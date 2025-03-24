@@ -2,21 +2,28 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShoppingCart, User, Menu, X, Search } from "lucide-react";
+import { ShoppingCart, User, Menu, X, Search, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Products", href: "/products" },
-  { name: "Stores", href: "/stores" },
-  { name: "Track Orders", href: "/order-tracking" },
+  { name: { en: "Home", ar: "الرئيسية" }, href: "/" },
+  { name: { en: "Products", ar: "المنتجات" }, href: "/products" },
+  { name: { en: "Stores", ar: "المتاجر" }, href: "/stores" },
+  { name: { en: "Track Orders", ar: "تتبع الطلبيات" }, href: "/order-tracking" },
 ];
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
   const location = useLocation();
 
   useEffect(() => {
@@ -27,8 +34,19 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'ar' : 'en');
+  };
+
+  const dir = language === 'ar' ? 'rtl' : 'ltr';
+
+  useEffect(() => {
+    document.documentElement.dir = dir;
+    document.documentElement.lang = language;
+  }, [language, dir]);
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen flex flex-col ${language === 'ar' ? 'font-arabic' : ''}`}>
       <header 
         className={`sticky top-0 z-50 transition-all duration-300 ${
           isScrolled 
@@ -39,13 +57,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="container mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <Link to="/" className="flex items-center">
-              <span className="text-xl font-bold tracking-tight">élite</span>
+              <span className="text-xl font-bold tracking-tight">Sweida Store</span>
             </Link>
             
             <nav className="hidden md:flex items-center space-x-8">
               {navigation.map((item) => (
                 <Link
-                  key={item.name}
+                  key={item.name.en}
                   to={item.href}
                   className={`text-sm font-medium transition-colors hover:text-primary relative ${
                     location.pathname === item.href
@@ -53,7 +71,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                       : "text-muted-foreground"
                   }`}
                 >
-                  {item.name}
+                  {item.name[language]}
                   {location.pathname === item.href && (
                     <motion.div
                       layoutId="navbar-indicator"
@@ -75,7 +93,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 className="relative hidden md:flex"
               >
                 <Input 
-                  placeholder="Search products..." 
+                  placeholder={language === 'en' ? "Search products..." : "البحث عن منتجات..."} 
                   className="w-[200px] pr-8" 
                   autoFocus
                   onBlur={() => setSearchOpen(false)}
@@ -95,6 +113,28 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 <Search className="h-5 w-5" />
               </Button>
             )}
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Globe className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setLanguage('en')}>
+                  English
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLanguage('ar')}>
+                  العربية
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <Link to="/order-tracking">
+              <Button variant="outline" size="sm" className="hidden md:flex">
+                {language === 'en' ? "Track Order" : "تتبع الطلبية"}
+              </Button>
+            </Link>
             
             <Link to="/cart">
               <Button variant="ghost" size="icon" className="relative">
@@ -121,7 +161,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 <div className="py-6 flex flex-col gap-6">
                   {navigation.map((item) => (
                     <Link
-                      key={item.name}
+                      key={item.name.en}
                       to={item.href}
                       className={`text-lg font-medium transition-colors ${
                         location.pathname === item.href
@@ -129,13 +169,18 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                           : "text-muted-foreground"
                       }`}
                     >
-                      {item.name}
+                      {item.name[language]}
                     </Link>
                   ))}
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/order-tracking">
+                      {language === 'en' ? "Track Order" : "تتبع الطلبية"}
+                    </Link>
+                  </Button>
                 </div>
                 <div className="mt-auto pt-6 border-t">
                   <div className="relative flex-1">
-                    <Input placeholder="Search products..." className="w-full" />
+                    <Input placeholder={language === 'en' ? "Search products..." : "البحث عن منتجات..."} className="w-full" />
                   </div>
                 </div>
               </SheetContent>
@@ -159,35 +204,41 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div>
-              <h3 className="font-semibold mb-4">élite</h3>
+              <h3 className="font-semibold mb-4">Sweida Store</h3>
               <p className="text-muted-foreground text-sm max-w-xs">
-                Premium products delivered with exceptional service, right to your doorstep.
+                {language === 'en' 
+                  ? "Premium products delivered with exceptional service, right to your doorstep."
+                  : "منتجات ممتازة مع خدمة استثنائية، تصل مباشرة إلى باب منزلك."}
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Quick Links</h3>
+              <h3 className="font-semibold mb-4">
+                {language === 'en' ? "Quick Links" : "روابط سريعة"}
+              </h3>
               <ul className="space-y-2">
                 {navigation.map((item) => (
-                  <li key={item.name}>
+                  <li key={item.name.en}>
                     <Link to={item.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                      {item.name}
+                      {item.name[language]}
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Contact</h3>
+              <h3 className="font-semibold mb-4">
+                {language === 'en' ? "Contact" : "اتصل بنا"}  
+              </h3>
               <address className="not-italic text-sm text-muted-foreground">
-                <p>1234 Design Avenue</p>
-                <p>Creative District, NY 10001</p>
-                <p className="mt-3">contact@elite-store.com</p>
-                <p>+1 (555) 123-4567</p>
+                <p>{language === 'en' ? "Sweida Main Road" : "الطريق الرئيسي - السويداء"}</p>
+                <p>{language === 'en' ? "Sweida, Syria" : "السويداء، سوريا"}</p>
+                <p className="mt-3">contact@sweida-store.com</p>
+                <p>+963 123 456 789</p>
               </address>
             </div>
           </div>
           <div className="mt-12 pt-6 border-t text-sm text-muted-foreground text-center">
-            <p>© {new Date().getFullYear()} élite. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Sweida Store. {language === 'en' ? "All rights reserved." : "جميع الحقوق محفوظة."}</p>
           </div>
         </div>
       </footer>

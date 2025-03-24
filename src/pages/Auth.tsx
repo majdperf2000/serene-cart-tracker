@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { PageTransition } from "@/components/ui/page-transition";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +23,7 @@ const Auth = () => {
     }, 1500);
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleForgotPassword = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     // Simulate API call
@@ -42,25 +44,35 @@ const Auth = () => {
             >
               <Card className="glass-card">
                 <CardHeader className="text-center">
-                  <CardTitle className="text-2xl font-bold">Welcome to élite</CardTitle>
+                  <CardTitle className="text-2xl font-bold">
+                    {language === 'en' ? "Welcome to Sweida Store" : "مرحبًا بك في متجر السويداء"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Tabs defaultValue="login" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 mb-6">
-                      <TabsTrigger value="login">Login</TabsTrigger>
-                      <TabsTrigger value="register">Register</TabsTrigger>
+                      <TabsTrigger value="login">
+                        {language === 'en' ? "Login" : "تسجيل الدخول"}
+                      </TabsTrigger>
+                      <TabsTrigger value="forgot">
+                        {language === 'en' ? "Forgot Password" : "نسيت كلمة المرور"}
+                      </TabsTrigger>
                     </TabsList>
                     <TabsContent value="login">
                       <form onSubmit={handleLogin} className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="email">Email</Label>
+                          <Label htmlFor="email">
+                            {language === 'en' ? "Email" : "البريد الإلكتروني"}
+                          </Label>
                           <Input id="email" placeholder="email@example.com" type="email" required />
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">
+                              {language === 'en' ? "Password" : "كلمة المرور"}
+                            </Label>
                             <Button variant="link" className="p-0 h-auto text-xs">
-                              Forgot password?
+                              {language === 'en' ? "Forgot password?" : "نسيت كلمة المرور؟"}
                             </Button>
                           </div>
                           <Input id="password" type="password" required />
@@ -72,10 +84,10 @@ const Auth = () => {
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                               </svg>
-                              Signing in...
+                              {language === 'en' ? "Signing in..." : "جاري تسجيل الدخول..."}
                             </span>
                           ) : (
-                            "Sign In"
+                            language === 'en' ? "Sign In" : "تسجيل الدخول"
                           )}
                         </Button>
                       </form>
@@ -85,7 +97,9 @@ const Auth = () => {
                             <div className="w-full border-t"></div>
                           </div>
                           <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                            <span className="bg-card px-2 text-muted-foreground">
+                              {language === 'en' ? "Or continue with" : "أو تابع باستخدام"}
+                            </span>
                           </div>
                         </div>
                         <div className="mt-4 grid grid-cols-2 gap-2">
@@ -97,30 +111,29 @@ const Auth = () => {
                           </Button>
                         </div>
                       </div>
+                      <div className="mt-6 text-center">
+                        <p className="text-sm text-muted-foreground">
+                          {language === 'en' ? "Don't have an account? " : "ليس لديك حساب؟ "}
+                          <Link to="/register" className="text-primary hover:underline">
+                            {language === 'en' ? "Register" : "سجل الآن"}
+                          </Link>
+                        </p>
+                      </div>
                     </TabsContent>
-                    <TabsContent value="register">
-                      <form onSubmit={handleRegister} className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="firstName">First name</Label>
-                            <Input id="firstName" required />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="lastName">Last name</Label>
-                            <Input id="lastName" required />
-                          </div>
+                    <TabsContent value="forgot">
+                      <form onSubmit={handleForgotPassword} className="space-y-4">
+                        <div className="text-center mb-4">
+                          <p className="text-sm text-muted-foreground">
+                            {language === 'en' 
+                              ? "Enter your email address and we'll send you a link to reset your password." 
+                              : "أدخل عنوان بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور."}
+                          </p>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="regEmail">Email</Label>
-                          <Input id="regEmail" placeholder="email@example.com" type="email" required />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="regPassword">Password</Label>
-                          <Input id="regPassword" type="password" required />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="confirmPassword">Confirm Password</Label>
-                          <Input id="confirmPassword" type="password" required />
+                          <Label htmlFor="resetEmail">
+                            {language === 'en' ? "Email" : "البريد الإلكتروني"}
+                          </Label>
+                          <Input id="resetEmail" placeholder="email@example.com" type="email" required />
                         </div>
                         <Button type="submit" className="w-full" disabled={isLoading}>
                           {isLoading ? (
@@ -129,12 +142,19 @@ const Auth = () => {
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                               </svg>
-                              Creating account...
+                              {language === 'en' ? "Sending..." : "جاري الإرسال..."}
                             </span>
                           ) : (
-                            "Create Account"
+                            language === 'en' ? "Send Reset Link" : "إرسال رابط إعادة التعيين"
                           )}
                         </Button>
+                        <div className="text-center mt-4">
+                          <Button variant="link" className="p-0 h-auto text-sm">
+                            <Link to="/auth">
+                              {language === 'en' ? "Back to login" : "العودة لتسجيل الدخول"}
+                            </Link>
+                          </Button>
+                        </div>
                       </form>
                     </TabsContent>
                   </Tabs>

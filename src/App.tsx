@@ -10,6 +10,7 @@ import { AnimatePresence } from "framer-motion";
 import Index from "./pages/Index";
 import ProductDetail from "./pages/ProductDetail";
 import Auth from "./pages/Auth";
+import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Dashboard from "./pages/Dashboard";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/dashboard" element={<Dashboard />} />

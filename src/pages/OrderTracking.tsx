@@ -1,343 +1,399 @@
 
-import { useState, useEffect } from "react";
-import { PageTransition } from "@/components/ui/page-transition";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import MainLayout from "@/components/layout/MainLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageTransition } from "@/components/ui/page-transition";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Truck, Check, Clock, ShoppingBag, Database, ArrowUpDown } from "lucide-react";
-import PaymentSystemArchitecture from "@/components/payment/PaymentSystemArchitecture";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
+import { MapPin, Truck, Calendar, Clock, Package, CheckCircle2 } from "lucide-react";
+import { PaymentSystemArchitecture } from "@/components/payment/PaymentSystemArchitecture";
+import { OrderDataFlow } from "@/components/tracking/OrderDataFlow";
+import { TrackingMap } from "@/components/tracking/TrackingMap";
 
 const OrderTracking = () => {
-  const [activeTab, setActiveTab] = useState("status");
-  
+  const [orderNumber, setOrderNumber] = useState("");
+  const [isTracking, setIsTracking] = useState(false);
+  const [orderFound, setOrderFound] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+
   // Mock order data
   const orderData = {
-    orderNumber: "ORD-12345-ABC",
-    orderDate: "March 15, 2023",
-    estimatedDelivery: "March 20, 2023",
-    status: "In Transit",
+    id: "ORD-12345-6789",
+    status: "in_transit",
+    statusText: {
+      en: "In Transit",
+      ar: "في الطريق"
+    },
+    customer: {
+      name: "Alex Johnson",
+      address: "123 Main St, Sweida, Syria"
+    },
+    orderDate: "2023-05-15",
+    estimatedDelivery: "2023-05-18",
+    currentLocation: "Sweida Distribution Center",
     items: [
-      { id: 1, name: "Premium Leather Jacket", price: 199.99, quantity: 1 },
-      { id: 2, name: "Designer Sunglasses", price: 149.99, quantity: 1 },
+      { name: "Wireless Headphones", quantity: 1, price: 89.99 },
+      { name: "Smart Watch", quantity: 1, price: 199.99 }
     ],
-    paymentMethod: "Credit Card (•••• 4567)",
-    shippingAddress: "123 Main Street, Apt 4B, New York, NY 10001",
-    trackingNumber: "TRK-9876543210",
-    carrier: "Express Delivery"
+    tracking: [
+      { date: "2023-05-15", time: "09:30", status: { en: "Order Placed", ar: "تم الطلب" }, location: "Online" },
+      { date: "2023-05-15", time: "14:45", status: { en: "Payment Confirmed", ar: "تأكيد الدفع" }, location: "Payment Gateway" },
+      { date: "2023-05-16", time: "08:20", status: { en: "Order Processed", ar: "تمت معالجة الطلب" }, location: "Sweida Warehouse" },
+      { date: "2023-05-17", time: "10:15", status: { en: "Out for Delivery", ar: "خرج للتوصيل" }, location: "Sweida Distribution Center" },
+    ],
+    driverLocation: {
+      lat: 32.7089,
+      lng: 36.5717, // Sweida coordinates
+      lastUpdated: "10 minutes ago"
+    }
   };
 
-  // Mock timeline data
-  const timeline = [
-    { date: "March 15, 2023", time: "10:30 AM", status: "Order Placed", description: "Your order has been confirmed" },
-    { date: "March 16, 2023", time: "9:15 AM", status: "Processing", description: "Your order is being prepared" },
-    { date: "March 17, 2023", time: "2:45 PM", status: "Shipped", description: "Your order has been shipped" },
-    { date: "March 20, 2023", time: "12:00 PM", status: "Estimated Delivery", description: "Expected delivery date" }
-  ];
+  const handleTrackOrder = () => {
+    if (!orderNumber) {
+      toast({
+        variant: "destructive",
+        title: language === 'en' ? "Error" : "خطأ",
+        description: language === 'en' ? "Please enter an order number" : "الرجاء إدخال رقم الطلبية",
+      });
+      return;
+    }
 
-  // Fix payment flow data to conform to the PaymentNode interface
-  const paymentFlow = {
-    currentNodeId: "currency-optimizer",
-    nodes: [
-      {
-        id: "payment-gateway",
-        label: "Payment Gateway",
-        status: "completed" as const,
-        description: "Initial payment processing and verification"
-      },
-      {
-        id: "transaction-preprocessor",
-        label: "Transaction Preprocessor",
-        status: "completed" as const,
-        description: "Payment data extraction and preparation for AI analysis"
-      },
-      {
-        id: "fraud-detection",
-        label: "Fraud Detection Model",
-        status: "completed" as const,
-        description: "Transaction analyzed for fraud patterns with 99.2% confidence"
-      },
-      {
-        id: "success-predictor",
-        label: "Payment Success Predictor",
-        status: "completed" as const,
-        description: "Optimized payment path selected for highest success rate"
-      },
-      {
-        id: "currency-optimizer",
-        label: "Currency Optimizer",
-        status: "processing" as const,
-        description: "Determining optimal currency conversion rates"
-      },
-      {
-        id: "finalization",
-        label: "Payment Finalization",
-        status: "pending" as const,
-        description: "Completing transaction and generating receipt"
+    setLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      if (orderNumber === "12345" || orderNumber === orderData.id) {
+        setOrderFound(true);
+        setIsTracking(true);
+        toast({
+          title: language === 'en' ? "Order Found" : "تم العثور على الطلبية",
+          description: language === 'en' 
+            ? `Tracking order ${orderData.id}` 
+            : `تتبع الطلبية ${orderData.id}`,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: language === 'en' ? "Order Not Found" : "لم يتم العثور على الطلبية",
+          description: language === 'en' 
+            ? "Please check your order number and try again" 
+            : "يرجى التحقق من رقم الطلبية والمحاولة مرة أخرى",
+        });
       }
-    ]
+      setLoading(false);
+    }, 1500);
   };
 
-  // Data flow visualization for tracking system
-  const dataFlow = {
-    currentNodeId: "eta-prediction",
-    nodes: [
-      {
-        id: "raw-gps",
-        label: "Raw GPS Data",
-        status: "completed" as const,
-        description: "Collection of location data from delivery vehicles"
-      },
-      {
-        id: "apache-kafka",
-        label: "Apache Kafka",
-        status: "completed" as const,
-        description: "Real-time data streaming and message queuing"
-      },
-      {
-        id: "spark-streaming",
-        label: "Spark Streaming",
-        status: "completed" as const,
-        description: "Processing and analyzing streaming data in real-time"
-      },
-      {
-        id: "ai-microservices",
-        label: "AI Microservices",
-        status: "processing" as const,
-        description: "Suite of AI services processing order tracking data"
-      },
-      {
-        id: "eta-prediction",
-        label: "ETA Prediction",
-        status: "processing" as const,
-        description: "Using machine learning to predict accurate delivery times"
-      },
-      {
-        id: "customer-app",
-        label: "Customer App",
-        status: "pending" as const,
-        description: "Delivery information presented to customer"
-      }
-    ]
+  const getStatusClass = (status: string) => {
+    switch (status) {
+      case "delivered":
+        return "bg-green-500 text-white";
+      case "in_transit":
+        return "bg-blue-500 text-white";
+      case "processing":
+        return "bg-yellow-500 text-white";
+      case "canceled":
+        return "bg-red-500 text-white";
+      default:
+        return "bg-gray-500 text-white";
+    }
   };
 
   return (
     <MainLayout>
       <PageTransition>
         <div className="container mx-auto px-4 py-12">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="heading-2 mb-2">Order Tracking</h1>
-            <p className="text-muted-foreground mb-8">
-              Track your order and view order details
-            </p>
+          <div className="max-w-3xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+            >
+              <h1 className="text-3xl font-bold text-center mb-8">
+                {language === 'en' ? "Track Your Order" : "تتبع طلبيتك"}
+              </h1>
 
-            <Card className="glass-card mb-8">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Order #{orderData.orderNumber}</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Placed on {orderData.orderDate}
-                  </p>
-                </div>
-                <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 flex items-center">
-                  <Clock className="h-4 w-4 mr-1" />
-                  <span className="text-sm font-medium">{orderData.status}</span>
-                </div>
-              </CardHeader>
-              <CardContent>
+              {!isTracking ? (
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-medium text-center">
+                      {language === 'en' ? "Enter your order details" : "أدخل تفاصيل طلبيتك"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="orderNumber">
+                          {language === 'en' ? "Order Number" : "رقم الطلبية"}
+                        </Label>
+                        <Input
+                          id="orderNumber"
+                          placeholder={language === 'en' ? "e.g. ORD-12345-6789" : "مثال: ORD-12345-6789"}
+                          value={orderNumber}
+                          onChange={(e) => setOrderNumber(e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {language === 'en' 
+                            ? "You can find your order number in the confirmation email" 
+                            : "يمكنك العثور على رقم الطلبية في البريد الإلكتروني للتأكيد"}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full" 
+                      onClick={handleTrackOrder}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <span className="flex items-center">
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          {language === 'en' ? "Tracking..." : "جارٍ التتبع..."}
+                        </span>
+                      ) : (
+                        language === 'en' ? "Track Order" : "تتبع الطلبية"
+                      )}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ) : (
                 <div className="space-y-6">
-                  <div className="relative">
-                    <div className="absolute h-1 bg-muted inset-x-0 top-5">
-                      <div className="h-1 bg-primary transition-all" style={{ width: "66%" }} />
-                    </div>
-                    <div className="relative flex justify-between">
-                      <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center mb-2">
-                          <Check className="h-5 w-5" />
-                        </div>
-                        <span className="text-xs text-center">Order Placed</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center mb-2">
-                          <Check className="h-5 w-5" />
-                        </div>
-                        <span className="text-xs text-center">Processing</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center mb-2">
-                          <Truck className="h-5 w-5" />
-                        </div>
-                        <span className="text-xs text-center">Shipped</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center mb-2">
-                          <ShoppingBag className="h-5 w-5" />
-                        </div>
-                        <span className="text-xs text-center">Delivered</span>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-semibold">
+                      {language === 'en' ? "Order " : "الطلبية "}{orderData.id}
+                    </h2>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setIsTracking(false);
+                        setOrderFound(false);
+                        setOrderNumber("");
+                      }}
+                    >
+                      {language === 'en' ? "Track Another Order" : "تتبع طلبية أخرى"}
+                    </Button>
                   </div>
 
-                  <div className="py-4">
-                    <h3 className="font-medium mb-2">Estimated Delivery</h3>
-                    <p>{orderData.estimatedDelivery}</p>
-                    <div className="mt-4 flex items-center text-sm">
-                      <span className="text-muted-foreground">Tracking Number:</span>
-                      <span className="ml-2 font-medium">{orderData.trackingNumber}</span>
-                      <span className="mx-2 text-muted-foreground">via</span>
-                      <span>{orderData.carrier}</span>
-                    </div>
-                  </div>
+                  <Card>
+                    <CardHeader className="pb-4">
+                      <div className="flex justify-between items-center">
+                        <CardTitle>
+                          {language === 'en' ? "Order Status" : "حالة الطلبية"}
+                        </CardTitle>
+                        <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusClass(orderData.status)}`}>
+                          {orderData.statusText[language]}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <Tabs defaultValue="status">
+                        <TabsList className="grid grid-cols-4 mb-4">
+                          <TabsTrigger value="status">
+                            {language === 'en' ? "Status" : "الحالة"}
+                          </TabsTrigger>
+                          <TabsTrigger value="map">
+                            {language === 'en' ? "Live Map" : "الخريطة المباشرة"}
+                          </TabsTrigger>
+                          <TabsTrigger value="payment">
+                            {language === 'en' ? "Payment" : "الدفع"}
+                          </TabsTrigger>
+                          <TabsTrigger value="data-flow">
+                            {language === 'en' ? "Data Flow" : "تدفق البيانات"}
+                          </TabsTrigger>
+                        </TabsList>
+                        
+                        {/* Status Tab */}
+                        <TabsContent value="status" className="pt-2">
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="flex flex-col space-y-1">
+                                <span className="text-sm text-muted-foreground">
+                                  {language === 'en' ? "Order Date" : "تاريخ الطلب"}
+                                </span>
+                                <div className="flex items-center">
+                                  <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                                  <span>{orderData.orderDate}</span>
+                                </div>
+                              </div>
+                              <div className="flex flex-col space-y-1">
+                                <span className="text-sm text-muted-foreground">
+                                  {language === 'en' ? "Estimated Delivery" : "التسليم المتوقع"}
+                                </span>
+                                <div className="flex items-center">
+                                  <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                                  <span>{orderData.estimatedDelivery}</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-1 mt-4">
+                              <h3 className="font-medium">
+                                {language === 'en' ? "Current Location" : "الموقع الحالي"}
+                              </h3>
+                              <div className="flex items-center">
+                                <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+                                <span>{orderData.currentLocation}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="mt-6">
+                              <h3 className="font-medium mb-3">
+                                {language === 'en' ? "Tracking History" : "سجل التتبع"}
+                              </h3>
+                              <div className="relative border-l pl-6 space-y-6 ml-2">
+                                {orderData.tracking.map((event, index) => (
+                                  <div key={index} className="relative pb-4">
+                                    <div className="absolute -left-[25px] top-1">
+                                      {index === 0 ? (
+                                        <div className="w-4 h-4 rounded-full bg-primary"></div>
+                                      ) : (
+                                        <div className="w-3 h-3 rounded-full border-2 border-primary bg-background"></div>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <p className="font-medium">{event.status[language]}</p>
+                                      <div className="flex gap-2 text-sm text-muted-foreground mt-1">
+                                        <span>{event.date} • {event.time}</span>
+                                        <span>•</span>
+                                        <span>{event.location}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </TabsContent>
+                        
+                        {/* Map Tab */}
+                        <TabsContent value="map">
+                          <div className="space-y-4">
+                            <p className="text-sm text-muted-foreground">
+                              {language === 'en' 
+                                ? "Live tracking of your delivery - updated in real-time" 
+                                : "تتبع مباشر للتوصيل - يتم التحديث في الوقت الفعلي"}
+                            </p>
+                            <div className="h-[350px] w-full border rounded-md overflow-hidden">
+                              <TrackingMap driverLocation={orderData.driverLocation} deliveryAddress={orderData.customer.address} />
+                            </div>
+                            
+                            <div className="flex items-center justify-between p-3 bg-accent/50 rounded-md mt-2">
+                              <div className="flex items-center">
+                                <Truck className="h-5 w-5 mr-3 text-primary" />
+                                <div>
+                                  <p className="text-sm font-medium">
+                                    {language === 'en' ? "Driver Update" : "تحديث السائق"}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {language === 'en' ? "Last updated: " : "آخر تحديث: "}
+                                    {orderData.driverLocation.lastUpdated}
+                                  </p>
+                                </div>
+                              </div>
+                              <Button variant="secondary" size="sm">
+                                {language === 'en' ? "Contact Driver" : "الاتصال بالسائق"}
+                              </Button>
+                            </div>
+                          </div>
+                        </TabsContent>
+                        
+                        {/* Payment Tab */}
+                        <TabsContent value="payment">
+                          <div className="space-y-4">
+                            <p className="text-sm text-muted-foreground">
+                              {language === 'en' 
+                                ? "Payment processing system information" 
+                                : "معلومات نظام معالجة الدفع"}
+                            </p>
+                            <PaymentSystemArchitecture />
+                          </div>
+                        </TabsContent>
+                        
+                        {/* Data Flow Tab */}
+                        <TabsContent value="data-flow">
+                          <div className="space-y-4">
+                            <p className="text-sm text-muted-foreground">
+                              {language === 'en' 
+                                ? "Order tracking data flow architecture" 
+                                : "هندسة تدفق بيانات تتبع الطلبات"}
+                            </p>
+                            <OrderDataFlow />
+                          </div>
+                        </TabsContent>
+                      </Tabs>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        {language === 'en' ? "Order Details" : "تفاصيل الطلبية"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="font-medium mb-2">
+                            {language === 'en' ? "Items" : "العناصر"}
+                          </h3>
+                          <div className="space-y-2">
+                            {orderData.items.map((item, index) => (
+                              <div key={index} className="flex justify-between items-center py-2 border-b">
+                                <div className="flex items-center">
+                                  <Package className="h-4 w-4 mr-2 text-muted-foreground" />
+                                  <span>{item.name} × {item.quantity}</span>
+                                </div>
+                                <span>${item.price.toFixed(2)}</span>
+                              </div>
+                            ))}
+                            <div className="flex justify-between items-center pt-2 font-semibold">
+                              <span>
+                                {language === 'en' ? "Total" : "المجموع"}
+                              </span>
+                              <span>
+                                ${orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h3 className="font-medium mb-2">
+                            {language === 'en' ? "Shipping Address" : "عنوان الشحن"}
+                          </h3>
+                          <div className="flex items-start">
+                            <MapPin className="h-4 w-4 mt-0.5 mr-2 text-muted-foreground" />
+                            <span>{orderData.customer.address}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <div className="w-full space-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          {language === 'en' 
+                            ? "Need help with your order? Contact our support team." 
+                            : "بحاجة إلى مساعدة بخصوص طلبيتك؟ اتصل بفريق الدعم لدينا."}
+                        </p>
+                        <Button variant="outline" className="w-full">
+                          {language === 'en' ? "Contact Support" : "الاتصال بالدعم"}
+                        </Button>
+                      </div>
+                    </CardFooter>
+                  </Card>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Tabs defaultValue="status" className="mb-8" onValueChange={setActiveTab}>
-              <TabsList className="grid grid-cols-4 mb-8">
-                <TabsTrigger value="status">Order Status</TabsTrigger>
-                <TabsTrigger value="details">Order Details</TabsTrigger>
-                <TabsTrigger value="payment">Payment Info</TabsTrigger>
-                <TabsTrigger value="dataflow">Data Flow</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="status">
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle>Order Timeline</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-6">
-                      {timeline.map((event, index) => (
-                        <div key={index} className="flex">
-                          <div className="mr-4 flex flex-col items-center">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              index < 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                            }`}>
-                              {index < 3 ? <Check className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
-                            </div>
-                            {index < timeline.length - 1 && (
-                              <div className="w-0.5 h-full bg-muted my-2 flex-grow" />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-medium">{event.status}</h4>
-                            <div className="text-sm text-muted-foreground">
-                              {event.date} at {event.time}
-                            </div>
-                            <p className="text-sm mt-1">{event.description}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="details">
-                <Card className="glass-card">
-                  <CardHeader>
-                    <CardTitle>Order Items</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {orderData.items.map((item) => (
-                        <div key={item.id} className="flex justify-between py-2">
-                          <div>
-                            <h4 className="font-medium">{item.name}</h4>
-                            <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
-                          </div>
-                          <div className="font-medium">
-                            ${item.price.toFixed(2)}
-                          </div>
-                        </div>
-                      ))}
-                      <Separator />
-                      <div className="flex justify-between pt-2">
-                        <span>Subtotal</span>
-                        <span>${orderData.items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Shipping</span>
-                        <span>Free</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Tax</span>
-                        <span>$35.00</span>
-                      </div>
-                      <Separator />
-                      <div className="flex justify-between font-medium">
-                        <span>Total</span>
-                        <span>${(orderData.items.reduce((sum, item) => sum + item.price * item.quantity, 0) + 35).toFixed(2)}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-8">
-                      <h4 className="font-medium mb-2">Shipping Address</h4>
-                      <p className="text-sm">{orderData.shippingAddress}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="payment">
-                <Card className="glass-card mb-6">
-                  <CardHeader>
-                    <CardTitle>Payment Information</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-medium mb-1">Payment Method</h4>
-                        <p>{orderData.paymentMethod}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium mb-1">Billing Address</h4>
-                        <p className="text-sm">{orderData.shippingAddress}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                {/* Payment System Architecture Component */}
-                <PaymentSystemArchitecture paymentFlow={paymentFlow} />
-              </TabsContent>
-              
-              <TabsContent value="dataflow">
-                <Card className="glass-card mb-6">
-                  <CardHeader>
-                    <CardTitle>Order Tracking Data Flow</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      شرح تدفق البيانات في النظام لتعقب الطلب
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="mb-4 p-4 bg-accent rounded-lg">
-                      <h4 className="font-medium mb-2">How Order Tracking Data Flows</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Our system collects GPS data from delivery vehicles, streams it through Apache Kafka, 
-                        and processes it using Spark Streaming. AI microservices then analyze the data for route optimization,
-                        ETA prediction, and fraud detection, which update the driver app, customer app, and admin dashboard.
-                      </p>
-                    </div>
-                    
-                    {/* Data Flow Architecture using the same component */}
-                    <PaymentSystemArchitecture paymentFlow={dataFlow} />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-
-            <div className="flex justify-between">
-              <Button variant="outline" asChild>
-                <a href="/">Continue Shopping</a>
-              </Button>
-              <Button asChild>
-                <a href="/support">
-                  Need Help? <ArrowRight className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
-            </div>
+              )}
+            </motion.div>
           </div>
         </div>
       </PageTransition>
