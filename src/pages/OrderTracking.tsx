@@ -1,204 +1,275 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageTransition } from "@/components/ui/page-transition";
 import MainLayout from "@/components/layout/MainLayout";
-import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Check, Truck, Package, Home } from "lucide-react";
+import { ArrowRight, Truck, Check, Clock, ShoppingBag } from "lucide-react";
+import PaymentSystemArchitecture from "@/components/payment/PaymentSystemArchitecture";
 
 const OrderTracking = () => {
-  const [orderId, setOrderId] = useState("");
-  const [isTracking, setIsTracking] = useState(false);
-  const [currentOrder, setCurrentOrder] = useState<{
-    id: string;
-    status: string;
-    date: string;
-    estimated: string;
-    items: string[];
-    steps: {
-      status: string;
-      date: string;
-      completed: boolean;
-    }[];
-  } | null>(null);
+  const [activeTab, setActiveTab] = useState("status");
+  
+  // Mock order data
+  const orderData = {
+    orderNumber: "ORD-12345-ABC",
+    orderDate: "March 15, 2023",
+    estimatedDelivery: "March 20, 2023",
+    status: "In Transit",
+    items: [
+      { id: 1, name: "Premium Leather Jacket", price: 199.99, quantity: 1 },
+      { id: 2, name: "Designer Sunglasses", price: 149.99, quantity: 1 },
+    ],
+    paymentMethod: "Credit Card (•••• 4567)",
+    shippingAddress: "123 Main Street, Apt 4B, New York, NY 10001",
+    trackingNumber: "TRK-9876543210",
+    carrier: "Express Delivery"
+  };
 
-  // Mock tracking search
-  const handleTrackOrder = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsTracking(true);
-    
-    // Simulate API call with a delay
-    setTimeout(() => {
-      setIsTracking(false);
-      
-      // Mock order data
-      if (orderId.trim()) {
-        setCurrentOrder({
-          id: orderId,
-          status: "In Transit",
-          date: "May 15, 2023",
-          estimated: "May 20, 2023",
-          items: ["Premium Leather Jacket", "Designer Sunglasses"],
-          steps: [
-            { status: "Order Placed", date: "May 15, 2023", completed: true },
-            { status: "Processing", date: "May 16, 2023", completed: true },
-            { status: "Shipped", date: "May 17, 2023", completed: true },
-            { status: "In Transit", date: "May 18, 2023", completed: true },
-            { status: "Out for Delivery", date: "May 19, 2023", completed: false },
-            { status: "Delivered", date: "May 20, 2023", completed: false }
-          ]
-        });
-      } else {
-        setCurrentOrder(null);
+  // Mock timeline data
+  const timeline = [
+    { date: "March 15, 2023", time: "10:30 AM", status: "Order Placed", description: "Your order has been confirmed" },
+    { date: "March 16, 2023", time: "9:15 AM", status: "Processing", description: "Your order is being prepared" },
+    { date: "March 17, 2023", time: "2:45 PM", status: "Shipped", description: "Your order has been shipped" },
+    { date: "March 20, 2023", time: "12:00 PM", status: "Estimated Delivery", description: "Expected delivery date" }
+  ];
+
+  // Mock payment flow data reflecting the AI architecture
+  const paymentFlow = {
+    currentNodeId: "currency-optimizer",
+    nodes: [
+      {
+        id: "payment-gateway",
+        label: "Payment Gateway",
+        status: "completed",
+        description: "Initial payment processing and verification"
+      },
+      {
+        id: "transaction-preprocessor",
+        label: "Transaction Preprocessor",
+        status: "completed",
+        description: "Payment data extraction and preparation for AI analysis"
+      },
+      {
+        id: "fraud-detection",
+        label: "Fraud Detection Model",
+        status: "completed",
+        description: "Transaction analyzed for fraud patterns with 99.2% confidence"
+      },
+      {
+        id: "success-predictor",
+        label: "Payment Success Predictor",
+        status: "completed",
+        description: "Optimized payment path selected for highest success rate"
+      },
+      {
+        id: "currency-optimizer",
+        label: "Currency Optimizer",
+        status: "processing",
+        description: "Determining optimal currency conversion rates"
+      },
+      {
+        id: "finalization",
+        label: "Payment Finalization",
+        status: "pending",
+        description: "Completing transaction and generating receipt"
       }
-    }, 1500);
+    ]
   };
 
   return (
     <MainLayout>
       <PageTransition>
         <div className="container mx-auto px-4 py-12">
-          <h1 className="heading-2 mb-8">Order Tracking</h1>
-          
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="heading-2 mb-2">Order Tracking</h1>
+            <p className="text-muted-foreground mb-8">
+              Track your order and view order details
+            </p>
+
             <Card className="glass-card mb-8">
-              <CardHeader>
-                <CardTitle>Track Your Order</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Order #{orderData.orderNumber}</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Placed on {orderData.orderDate}
+                  </p>
+                </div>
+                <div className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 flex items-center">
+                  <Clock className="h-4 w-4 mr-1" />
+                  <span className="text-sm font-medium">{orderData.status}</span>
+                </div>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleTrackOrder} className="flex gap-4">
-                  <div className="flex-1">
-                    <Label htmlFor="orderId" className="sr-only">
-                      Order ID
-                    </Label>
-                    <Input
-                      id="orderId"
-                      placeholder="Enter your order number (e.g., ORD-12345)"
-                      value={orderId}
-                      onChange={(e) => setOrderId(e.target.value)}
-                      required
-                    />
+                <div className="space-y-6">
+                  <div className="relative">
+                    <div className="absolute h-1 bg-muted inset-x-0 top-5">
+                      <div className="h-1 bg-primary transition-all" style={{ width: "66%" }} />
+                    </div>
+                    <div className="relative flex justify-between">
+                      <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center mb-2">
+                          <Check className="h-5 w-5" />
+                        </div>
+                        <span className="text-xs text-center">Order Placed</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center mb-2">
+                          <Check className="h-5 w-5" />
+                        </div>
+                        <span className="text-xs text-center">Processing</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center mb-2">
+                          <Truck className="h-5 w-5" />
+                        </div>
+                        <span className="text-xs text-center">Shipped</span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center mb-2">
+                          <ShoppingBag className="h-5 w-5" />
+                        </div>
+                        <span className="text-xs text-center">Delivered</span>
+                      </div>
+                    </div>
                   </div>
-                  <Button type="submit" disabled={isTracking}>
-                    {isTracking ? (
-                      <span className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Tracking...
-                      </span>
-                    ) : (
-                      "Track Order"
-                    )}
-                  </Button>
-                </form>
+
+                  <div className="py-4">
+                    <h3 className="font-medium mb-2">Estimated Delivery</h3>
+                    <p>{orderData.estimatedDelivery}</p>
+                    <div className="mt-4 flex items-center text-sm">
+                      <span className="text-muted-foreground">Tracking Number:</span>
+                      <span className="ml-2 font-medium">{orderData.trackingNumber}</span>
+                      <span className="mx-2 text-muted-foreground">via</span>
+                      <span>{orderData.carrier}</span>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
-            
-            {currentOrder && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
+
+            <Tabs defaultValue="status" className="mb-8" onValueChange={setActiveTab}>
+              <TabsList className="grid grid-cols-3 mb-8">
+                <TabsTrigger value="status">Order Status</TabsTrigger>
+                <TabsTrigger value="details">Order Details</TabsTrigger>
+                <TabsTrigger value="payment">Payment Info</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="status">
                 <Card className="glass-card">
                   <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">Order #{currentOrder.id}</p>
-                        <CardTitle>Tracking Details</CardTitle>
-                      </div>
-                      <div className="text-right">
-                        <span className="inline-block px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">
-                          {currentOrder.status}
-                        </span>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Estimated delivery: {currentOrder.estimated}
-                        </p>
-                      </div>
-                    </div>
+                    <CardTitle>Order Timeline</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="mb-8">
-                      <h3 className="font-medium mb-2">Order Items</h3>
-                      <ul className="space-y-1 text-sm">
-                        {currentOrder.items.map((item, i) => (
-                          <li key={i} className="flex items-center">
-                            <span className="inline-block w-2 h-2 rounded-full bg-primary mr-2"></span>
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
+                    <div className="space-y-6">
+                      {timeline.map((event, index) => (
+                        <div key={index} className="flex">
+                          <div className="mr-4 flex flex-col items-center">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                              index < 3 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                            }`}>
+                              {index < 3 ? <Check className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
+                            </div>
+                            {index < timeline.length - 1 && (
+                              <div className="w-0.5 h-full bg-muted my-2 flex-grow" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">{event.status}</h4>
+                            <div className="text-sm text-muted-foreground">
+                              {event.date} at {event.time}
+                            </div>
+                            <p className="text-sm mt-1">{event.description}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    
-                    <div className="space-y-8">
-                      <h3 className="font-medium">Tracking Timeline</h3>
-                      
-                      <div className="relative">
-                        {/* Progress Bar */}
-                        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-muted">
-                          <div 
-                            className="w-0.5 bg-primary transition-all" 
-                            style={{ 
-                              height: `${(currentOrder.steps.filter(step => step.completed).length - 1) * 100 / (currentOrder.steps.length - 1)}%` 
-                            }}
-                          />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="details">
+                <Card className="glass-card">
+                  <CardHeader>
+                    <CardTitle>Order Items</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {orderData.items.map((item) => (
+                        <div key={item.id} className="flex justify-between py-2">
+                          <div>
+                            <h4 className="font-medium">{item.name}</h4>
+                            <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
+                          </div>
+                          <div className="font-medium">
+                            ${item.price.toFixed(2)}
+                          </div>
                         </div>
-                        
-                        {/* Steps */}
-                        <div className="space-y-8 relative">
-                          {currentOrder.steps.map((step, i) => {
-                            let StepIcon;
-                            if (step.status.includes("Order")) StepIcon = Package;
-                            else if (step.status.includes("Transit") || step.status.includes("Ship")) StepIcon = Truck;
-                            else if (step.status.includes("Delivered")) StepIcon = Home;
-                            else StepIcon = Check;
-                            
-                            return (
-                              <div key={i} className="flex">
-                                <div className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full ${
-                                  step.completed 
-                                    ? "bg-primary text-primary-foreground" 
-                                    : "bg-muted text-muted-foreground"
-                                }`}>
-                                  <StepIcon className="h-5 w-5" />
-                                </div>
-                                <div className="ml-4 flex-1">
-                                  <div className="flex flex-wrap justify-between items-start">
-                                    <div>
-                                      <h4 className="font-medium">{step.status}</h4>
-                                      {step.completed && (
-                                        <p className="text-sm text-muted-foreground">{step.date}</p>
-                                      )}
-                                    </div>
-                                    {!step.completed && (
-                                      <span className="text-sm text-muted-foreground">
-                                        Estimated: {step.date}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
+                      ))}
+                      <Separator />
+                      <div className="flex justify-between pt-2">
+                        <span>Subtotal</span>
+                        <span>${orderData.items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Shipping</span>
+                        <span>Free</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tax</span>
+                        <span>$35.00</span>
+                      </div>
+                      <Separator />
+                      <div className="flex justify-between font-medium">
+                        <span>Total</span>
+                        <span>${(orderData.items.reduce((sum, item) => sum + item.price * item.quantity, 0) + 35).toFixed(2)}</span>
                       </div>
                     </div>
                     
-                    <div className="mt-8 pt-6 border-t">
-                      <div className="flex items-center justify-between">
-                        <Button variant="outline">Contact Support</Button>
-                        <Button>View Order Details</Button>
+                    <div className="mt-8">
+                      <h4 className="font-medium mb-2">Shipping Address</h4>
+                      <p className="text-sm">{orderData.shippingAddress}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="payment">
+                <Card className="glass-card mb-6">
+                  <CardHeader>
+                    <CardTitle>Payment Information</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium mb-1">Payment Method</h4>
+                        <p>{orderData.paymentMethod}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium mb-1">Billing Address</h4>
+                        <p className="text-sm">{orderData.shippingAddress}</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
-            )}
+                
+                {/* Payment System Architecture Component */}
+                <PaymentSystemArchitecture paymentFlow={paymentFlow} />
+              </TabsContent>
+            </Tabs>
+
+            <div className="flex justify-between">
+              <Button variant="outline" asChild>
+                <a href="/">Continue Shopping</a>
+              </Button>
+              <Button asChild>
+                <a href="/support">
+                  Need Help? <ArrowRight className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </PageTransition>
