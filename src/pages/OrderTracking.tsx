@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Truck, Check, Clock, ShoppingBag } from "lucide-react";
+import { ArrowRight, Truck, Check, Clock, ShoppingBag, Database, ArrowUpDown } from "lucide-react";
 import PaymentSystemArchitecture from "@/components/payment/PaymentSystemArchitecture";
 
 const OrderTracking = () => {
@@ -36,45 +36,88 @@ const OrderTracking = () => {
     { date: "March 20, 2023", time: "12:00 PM", status: "Estimated Delivery", description: "Expected delivery date" }
   ];
 
-  // Mock payment flow data reflecting the AI architecture
+  // Fix payment flow data to conform to the PaymentNode interface
   const paymentFlow = {
     currentNodeId: "currency-optimizer",
     nodes: [
       {
         id: "payment-gateway",
         label: "Payment Gateway",
-        status: "completed",
+        status: "completed" as const,
         description: "Initial payment processing and verification"
       },
       {
         id: "transaction-preprocessor",
         label: "Transaction Preprocessor",
-        status: "completed",
+        status: "completed" as const,
         description: "Payment data extraction and preparation for AI analysis"
       },
       {
         id: "fraud-detection",
         label: "Fraud Detection Model",
-        status: "completed",
+        status: "completed" as const,
         description: "Transaction analyzed for fraud patterns with 99.2% confidence"
       },
       {
         id: "success-predictor",
         label: "Payment Success Predictor",
-        status: "completed",
+        status: "completed" as const,
         description: "Optimized payment path selected for highest success rate"
       },
       {
         id: "currency-optimizer",
         label: "Currency Optimizer",
-        status: "processing",
+        status: "processing" as const,
         description: "Determining optimal currency conversion rates"
       },
       {
         id: "finalization",
         label: "Payment Finalization",
-        status: "pending",
+        status: "pending" as const,
         description: "Completing transaction and generating receipt"
+      }
+    ]
+  };
+
+  // Data flow visualization for tracking system
+  const dataFlow = {
+    currentNodeId: "eta-prediction",
+    nodes: [
+      {
+        id: "raw-gps",
+        label: "Raw GPS Data",
+        status: "completed" as const,
+        description: "Collection of location data from delivery vehicles"
+      },
+      {
+        id: "apache-kafka",
+        label: "Apache Kafka",
+        status: "completed" as const,
+        description: "Real-time data streaming and message queuing"
+      },
+      {
+        id: "spark-streaming",
+        label: "Spark Streaming",
+        status: "completed" as const,
+        description: "Processing and analyzing streaming data in real-time"
+      },
+      {
+        id: "ai-microservices",
+        label: "AI Microservices",
+        status: "processing" as const,
+        description: "Suite of AI services processing order tracking data"
+      },
+      {
+        id: "eta-prediction",
+        label: "ETA Prediction",
+        status: "processing" as const,
+        description: "Using machine learning to predict accurate delivery times"
+      },
+      {
+        id: "customer-app",
+        label: "Customer App",
+        status: "pending" as const,
+        description: "Delivery information presented to customer"
       }
     ]
   };
@@ -151,10 +194,11 @@ const OrderTracking = () => {
             </Card>
 
             <Tabs defaultValue="status" className="mb-8" onValueChange={setActiveTab}>
-              <TabsList className="grid grid-cols-3 mb-8">
+              <TabsList className="grid grid-cols-4 mb-8">
                 <TabsTrigger value="status">Order Status</TabsTrigger>
                 <TabsTrigger value="details">Order Details</TabsTrigger>
                 <TabsTrigger value="payment">Payment Info</TabsTrigger>
+                <TabsTrigger value="dataflow">Data Flow</TabsTrigger>
               </TabsList>
 
               <TabsContent value="status">
@@ -257,6 +301,30 @@ const OrderTracking = () => {
                 
                 {/* Payment System Architecture Component */}
                 <PaymentSystemArchitecture paymentFlow={paymentFlow} />
+              </TabsContent>
+              
+              <TabsContent value="dataflow">
+                <Card className="glass-card mb-6">
+                  <CardHeader>
+                    <CardTitle>Order Tracking Data Flow</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      شرح تدفق البيانات في النظام لتعقب الطلب
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4 p-4 bg-accent rounded-lg">
+                      <h4 className="font-medium mb-2">How Order Tracking Data Flows</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Our system collects GPS data from delivery vehicles, streams it through Apache Kafka, 
+                        and processes it using Spark Streaming. AI microservices then analyze the data for route optimization,
+                        ETA prediction, and fraud detection, which update the driver app, customer app, and admin dashboard.
+                      </p>
+                    </div>
+                    
+                    {/* Data Flow Architecture using the same component */}
+                    <PaymentSystemArchitecture paymentFlow={dataFlow} />
+                  </CardContent>
+                </Card>
               </TabsContent>
             </Tabs>
 
