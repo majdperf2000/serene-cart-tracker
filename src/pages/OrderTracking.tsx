@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import MainLayout from "@/components/layout/MainLayout";
@@ -106,7 +107,7 @@ const OrderTracking = () => {
       {
         id: "payment-request",
         label: language === 'en' ? "Payment Request" : "طلب الدفع",
-        status: "completed",
+        status: "completed" as const,
         description: language === 'en' 
           ? "Payment request received from customer" 
           : "تم استلام طلب الدفع من العميل"
@@ -114,7 +115,7 @@ const OrderTracking = () => {
       {
         id: "fraud-detection",
         label: language === 'en' ? "Fraud Analysis" : "تحليل الاحتيال",
-        status: "completed",
+        status: "completed" as const,
         description: language === 'en' 
           ? "AI-powered fraud detection system verified transaction" 
           : "نظام كشف الاحتيال بالذكاء الاصطناعي تحقق من المعاملة"
@@ -122,7 +123,7 @@ const OrderTracking = () => {
       {
         id: "payment-processing",
         label: language === 'en' ? "Payment Processing" : "معالجة الدفع",
-        status: "completed",
+        status: "completed" as const,
         description: language === 'en' 
           ? "Transaction processed through payment gateway" 
           : "تمت معالجة المعاملة من خلال بوابة الدفع"
@@ -130,7 +131,7 @@ const OrderTracking = () => {
       {
         id: "order-confirmation",
         label: language === 'en' ? "Order Confirmation" : "تأكيد الطلب",
-        status: "completed",
+        status: "completed" as const,
         description: language === 'en' 
           ? "Payment confirmed and order created" 
           : "تم تأكيد الدفع وإنشاء الطلب"
