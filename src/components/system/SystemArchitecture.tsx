@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronRight, Lock, Server, LayoutGrid, Features } from "lucide-react";
+import { ChevronRight, Lock, Server, LayoutGrid, Puzzle } from "lucide-react";
 
 export const SystemArchitecture = () => {
   const [activeTab, setActiveTab] = useState<string>("visual");
@@ -91,7 +91,7 @@ export const SystemArchitecture = () => {
                 <div className="flex items-center gap-2 justify-center">
                   <Card className="w-40 h-20 bg-purple-50 flex items-center justify-center p-0">
                     <CardContent className="p-2 flex flex-col items-center">
-                      <Features className="h-4 w-4 mb-1" />
+                      <Puzzle className="h-4 w-4 mb-1" />
                       <span className="text-xs font-medium">Features</span>
                     </CardContent>
                   </Card>
@@ -170,7 +170,7 @@ export const SystemArchitecture = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center">
-                  <Features className="h-4 w-4 mr-2" />
+                  <Puzzle className="h-4 w-4 mr-2" />
                   Feature Set
                 </CardTitle>
               </CardHeader>
