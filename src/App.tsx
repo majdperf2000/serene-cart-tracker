@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import OrderTracking from "./pages/OrderTracking";
 import Stores from "./pages/Stores";
 import StoresMap from "./pages/StoresMap";
+import ControlPanels from "./pages/ControlPanels";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/order-tracking" element={<OrderTracking />} />
             <Route path="/stores" element={<Stores />} />
             <Route path="/stores-map" element={<StoresMap />} />
+            <Route path="/control-panels" element={<ControlPanels />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AnimatePresence>
