@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import MainLayout from "@/components/layout/MainLayout";
@@ -22,7 +21,6 @@ const OrderTracking = () => {
   const { toast } = useToast();
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
 
-  // Mock order data
   const orderData = {
     id: "ORD-12345-6789",
     status: "in_transit",
@@ -49,7 +47,7 @@ const OrderTracking = () => {
     ],
     driverLocation: {
       lat: 32.7089,
-      lng: 36.5717, // Sweida coordinates
+      lng: 36.5717,
       lastUpdated: "10 minutes ago"
     }
   };
@@ -65,7 +63,6 @@ const OrderTracking = () => {
     }
 
     setLoading(true);
-    // Simulate API call
     setTimeout(() => {
       if (orderNumber === "12345" || orderNumber === orderData.id) {
         setOrderFound(true);
@@ -102,6 +99,44 @@ const OrderTracking = () => {
       default:
         return "bg-gray-500 text-white";
     }
+  };
+
+  const paymentFlowData = {
+    nodes: [
+      {
+        id: "payment-request",
+        label: language === 'en' ? "Payment Request" : "طلب الدفع",
+        status: "completed",
+        description: language === 'en' 
+          ? "Payment request received from customer" 
+          : "تم استلام طلب الدفع من العميل"
+      },
+      {
+        id: "fraud-detection",
+        label: language === 'en' ? "Fraud Analysis" : "تحليل الاحتيال",
+        status: "completed",
+        description: language === 'en' 
+          ? "AI-powered fraud detection system verified transaction" 
+          : "نظام كشف الاحتيال بالذكاء الاصطناعي تحقق من المعاملة"
+      },
+      {
+        id: "payment-processing",
+        label: language === 'en' ? "Payment Processing" : "معالجة الدفع",
+        status: "completed",
+        description: language === 'en' 
+          ? "Transaction processed through payment gateway" 
+          : "تمت معالجة المعاملة من خلال بوابة الدفع"
+      },
+      {
+        id: "order-confirmation",
+        label: language === 'en' ? "Order Confirmation" : "تأكيد الطلب",
+        status: "completed",
+        description: language === 'en' 
+          ? "Payment confirmed and order created" 
+          : "تم تأكيد الدفع وإنشاء الطلب"
+      }
+    ],
+    currentNodeId: "order-confirmation"
   };
 
   return (
@@ -212,7 +247,6 @@ const OrderTracking = () => {
                           </TabsTrigger>
                         </TabsList>
                         
-                        {/* Status Tab */}
                         <TabsContent value="status" className="pt-2">
                           <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
@@ -275,7 +309,6 @@ const OrderTracking = () => {
                           </div>
                         </TabsContent>
                         
-                        {/* Map Tab */}
                         <TabsContent value="map">
                           <div className="space-y-4">
                             <p className="text-sm text-muted-foreground">
@@ -307,7 +340,6 @@ const OrderTracking = () => {
                           </div>
                         </TabsContent>
                         
-                        {/* Payment Tab */}
                         <TabsContent value="payment">
                           <div className="space-y-4">
                             <p className="text-sm text-muted-foreground">
@@ -315,11 +347,10 @@ const OrderTracking = () => {
                                 ? "Payment processing system information" 
                                 : "معلومات نظام معالجة الدفع"}
                             </p>
-                            <PaymentSystemArchitecture />
+                            <PaymentSystemArchitecture paymentFlow={paymentFlowData} />
                           </div>
                         </TabsContent>
                         
-                        {/* Data Flow Tab */}
                         <TabsContent value="data-flow">
                           <div className="space-y-4">
                             <p className="text-sm text-muted-foreground">
