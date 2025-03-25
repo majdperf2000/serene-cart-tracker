@@ -10,7 +10,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { MapPin, Truck, Calendar, Clock, Package, CheckCircle2 } from "lucide-react";
-import { PaymentSystemArchitecture } from "@/components/payment/PaymentSystemArchitecture";
+import PaymentSystemArchitecture from "@/components/payment/PaymentSystemArchitecture";
 import { OrderDataFlow } from "@/components/tracking/OrderDataFlow";
 import { TrackingMap } from "@/components/tracking/TrackingMap";
 
