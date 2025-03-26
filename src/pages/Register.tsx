@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import MainLayout from "@/components/layout/MainLayout";
@@ -20,17 +19,18 @@ import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FileUpload } from "@/components/auth/FileUpload";
+import { toast } from "sonner";
+import { User, Store, Truck, ShieldCheck, LayoutDashboard } from "lucide-react";
 
 const Register = () => {
-  const [userType, setUserType] = useState<"customer" | "store" | "delivery">("customer");
+  const [userType, setUserType] = useState<"customer" | "store" | "delivery" | "admin" | "owner">("customer");
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const [language, setLanguage] = useState<'en' | 'ar'>('ar');
   const [otp, setOtp] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Fake function to simulate document verification
   const verifyDocuments = () => {
     setIsLoading(true);
     setTimeout(() => {
@@ -45,7 +45,6 @@ const Register = () => {
     }, 2000);
   };
   
-  // Fake function to simulate OTP verification
   const verifyOTP = () => {
     if (otp.length === 6) {
       setIsLoading(true);
@@ -70,7 +69,6 @@ const Register = () => {
     }
   };
   
-  // Function to handle registration completion
   const completeRegistration = () => {
     setIsLoading(true);
     setTimeout(() => {
@@ -81,7 +79,26 @@ const Register = () => {
           ? "Your account has been created successfully" 
           : "تم إنشاء حسابك بنجاح",
       });
-      navigate("/dashboard");
+      
+      switch (userType) {
+        case "customer":
+          navigate("/dashboard");
+          break;
+        case "store":
+          navigate("/control-panels#3");
+          break;
+        case "delivery":
+          navigate("/control-panels#4");
+          break;
+        case "admin":
+          navigate("/control-panels#2");
+          break;
+        case "owner":
+          navigate("/control-panels#1");
+          break;
+        default:
+          navigate("/dashboard");
+      }
     }, 1500);
   };
   
@@ -544,6 +561,284 @@ const Register = () => {
         return null;
     }
   };
+  
+  const renderAdminRegistration = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="adminName">{language === 'en' ? "Full Name" : "الاسم الكامل"}</Label>
+              <Input id="adminName" placeholder={language === 'en' ? "Admin Full Name" : "اسم المدير الكامل"} />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="adminEmail">{language === 'en' ? "Email" : "البريد الإلكتروني"}</Label>
+              <Input id="adminEmail" type="email" placeholder={language === 'en' ? "admin@example.com" : "مدير@مثال.كوم"} />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="adminPhone">{language === 'en' ? "Phone Number" : "رقم الهاتف"}</Label>
+              <Input id="adminPhone" type="tel" placeholder={language === 'en' ? "+963 XXX XXX XXX" : "963+ XXX XXX XXX"} />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>{language === 'en' ? "Admin Level" : "مستوى الإدارة"}</Label>
+              <Select defaultValue="system">
+                <SelectTrigger>
+                  <SelectValue placeholder={language === 'en' ? "Select level" : "اختر المستوى"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="system">{language === 'en' ? "System Admin" : "مدير النظام"}</SelectItem>
+                  <SelectItem value="content">{language === 'en' ? "Content Admin" : "مدير المحتوى"}</SelectItem>
+                  <SelectItem value="support">{language === 'en' ? "Support Admin" : "مدير الدعم"}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Button 
+              onClick={() => setStep(2)} 
+              className="w-full mt-2"
+              disabled={isLoading}
+            >
+              {language === 'en' ? "Continue" : "متابعة"}
+            </Button>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-medium mb-2">
+                {language === 'en' ? "Verification" : "التحقق"}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {language === 'en' 
+                  ? "Please upload identification documents" 
+                  : "يرجى تحميل وثائق التعريف"}
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label className="mb-2 block">
+                  {language === 'en' ? "ID Document" : "وثيقة الهوية"}
+                </Label>
+                <FileUpload accept=".pdf,.jpg,.jpeg,.png" />
+              </div>
+              
+              <div>
+                <Label className="mb-2 block">
+                  {language === 'en' ? "Employment Certificate" : "شهادة العمل"}
+                </Label>
+                <FileUpload accept=".pdf,.jpg,.jpeg,.png" />
+              </div>
+            </div>
+            
+            <Button 
+              onClick={verifyDocuments} 
+              className="w-full mt-4"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {language === 'en' ? "Verifying..." : "جارٍ التحقق..."}
+                </span>
+              ) : (
+                language === 'en' ? "Submit for Verification" : "تقديم للتحقق"
+              )}
+            </Button>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="space-y-4">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-medium mb-2">
+                {language === 'en' ? "Set Admin Password" : "تعيين كلمة مرور المدير"}
+              </h3>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="adminPassword">{language === 'en' ? "Password" : "كلمة المرور"}</Label>
+              <Input id="adminPassword" type="password" />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="adminConfirmPassword">{language === 'en' ? "Confirm Password" : "تأكيد كلمة المرور"}</Label>
+              <Input id="adminConfirmPassword" type="password" />
+            </div>
+            
+            <Button 
+              onClick={completeRegistration} 
+              className="w-full mt-4"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {language === 'en' ? "Creating Admin Account..." : "جارٍ إنشاء حساب المدير..."}
+                </span>
+              ) : (
+                language === 'en' ? "Activate Admin Account" : "تفعيل حساب المدير"
+              )}
+            </Button>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+  
+  const renderOwnerRegistration = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="ownerName">{language === 'en' ? "Full Name" : "الاسم الكامل"}</Label>
+              <Input id="ownerName" placeholder={language === 'en' ? "Owner Full Name" : "اسم المالك الكامل"} />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="ownerEmail">{language === 'en' ? "Email" : "البريد الإلكتروني"}</Label>
+              <Input id="ownerEmail" type="email" placeholder={language === 'en' ? "owner@example.com" : "مالك@مثال.كوم"} />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="ownerPhone">{language === 'en' ? "Phone Number" : "رقم الهاتف"}</Label>
+              <Input id="ownerPhone" type="tel" placeholder={language === 'en' ? "+963 XXX XXX XXX" : "963+ XXX XXX XXX"} />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>{language === 'en' ? "Ownership Documents" : "وثائق الملكية"}</Label>
+              <FileUpload accept=".pdf,.jpg,.jpeg,.png" />
+            </div>
+            
+            <Button 
+              onClick={() => setStep(2)} 
+              className="w-full mt-2"
+              disabled={isLoading}
+            >
+              {language === 'en' ? "Continue" : "متابعة"}
+            </Button>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="space-y-4">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-medium mb-2">
+                {language === 'en' ? "Security Verification" : "التحقق الأمني"}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {language === 'en' 
+                  ? "For maximum security, please set up two-factor authentication" 
+                  : "لأقصى درجات الأمان، يرجى إعداد المصادقة الثنائية"}
+              </p>
+            </div>
+            
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-medium mb-2">
+                {language === 'en' ? "Enter Security Code" : "أدخل رمز الأمان"}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {language === 'en' 
+                  ? "We've sent a verification code to your email/phone" 
+                  : "لقد أرسلنا رمز التحقق إلى بريدك الإلكتروني/هاتفك"}
+              </p>
+            </div>
+            
+            <div className="flex justify-center mb-6">
+              <InputOTP 
+                maxLength={6} 
+                value={otp} 
+                onChange={(value) => setOtp(value)}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+            
+            <Button 
+              onClick={verifyOTP} 
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {language === 'en' ? "Verifying..." : "جارٍ التحقق..."}
+                </span>
+              ) : (
+                language === 'en' ? "Verify Code" : "تحقق من الرمز"
+              )}
+            </Button>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="space-y-4">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-medium mb-2">
+                {language === 'en' ? "Set Owner Password" : "تعيين كلمة مرور المالك"}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {language === 'en' 
+                  ? "Create a strong password for your owner account" 
+                  : "أنشئ كلمة مرور قوية لحساب المالك الخاص بك"}
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="ownerPassword">{language === 'en' ? "Password" : "كلمة المرور"}</Label>
+              <Input id="ownerPassword" type="password" />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="ownerConfirmPassword">{language === 'en' ? "Confirm Password" : "تأكيد كلمة المرور"}</Label>
+              <Input id="ownerConfirmPassword" type="password" />
+            </div>
+            
+            <Button 
+              onClick={completeRegistration} 
+              className="w-full mt-4"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  {language === 'en' ? "Activating Owner Account..." : "جارٍ تفعيل حساب المالك..."}
+                </span>
+              ) : (
+                language === 'en' ? "Activate Owner Account" : "تفعيل حساب المالك"
+              )}
+            </Button>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <MainLayout>
@@ -570,20 +865,43 @@ const Register = () => {
                       </Label>
                       <RadioGroup 
                         value={userType} 
-                        onValueChange={(value) => setUserType(value as "customer" | "store" | "delivery")}
+                        onValueChange={(value) => setUserType(value as "customer" | "store" | "delivery" | "admin" | "owner")}
                         className="space-y-2"
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="customer" id="customer" />
-                          <Label htmlFor="customer">{language === 'en' ? "Customer" : "عميل"}</Label>
+                          <Label htmlFor="customer" className="flex items-center gap-1">
+                            <User className="h-4 w-4" />
+                            {language === 'en' ? "Customer" : "عميل"}
+                          </Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="store" id="store" />
-                          <Label htmlFor="store">{language === 'en' ? "Store" : "متجر"}</Label>
+                          <Label htmlFor="store" className="flex items-center gap-1">
+                            <Store className="h-4 w-4" />
+                            {language === 'en' ? "Store" : "متجر"}
+                          </Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="delivery" id="delivery" />
-                          <Label htmlFor="delivery">{language === 'en' ? "Delivery Person" : "موصل طلبات"}</Label>
+                          <Label htmlFor="delivery" className="flex items-center gap-1">
+                            <Truck className="h-4 w-4" />
+                            {language === 'en' ? "Delivery Person" : "موصل طلبات"}
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="admin" id="admin" />
+                          <Label htmlFor="admin" className="flex items-center gap-1">
+                            <LayoutDashboard className="h-4 w-4" />
+                            {language === 'en' ? "Admin" : "مدير"}
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="owner" id="owner" />
+                          <Label htmlFor="owner" className="flex items-center gap-1">
+                            <ShieldCheck className="h-4 w-4" />
+                            {language === 'en' ? "Owner" : "مالك"}
+                          </Label>
                         </div>
                       </RadioGroup>
                     </div>
@@ -592,6 +910,8 @@ const Register = () => {
                   {userType === "customer" && renderCustomerRegistration()}
                   {userType === "store" && renderStoreRegistration()}
                   {userType === "delivery" && renderDeliveryRegistration()}
+                  {userType === "admin" && renderAdminRegistration()}
+                  {userType === "owner" && renderOwnerRegistration()}
                 </CardContent>
               </Card>
             </motion.div>
