@@ -1,7 +1,8 @@
+
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock, Server, LayoutGrid, Puzzle } from "lucide-react";
+import { Lock, Server, LayoutGrid, Puzzle, BarChart, FileText } from "lucide-react";
 import {
   ReactFlow,
   Background,
@@ -91,6 +92,30 @@ export const SystemArchitecture = () => {
         description: "Application functionality"
       },
       style: { background: "#F8EFFF", borderColor: "#DCC5FF" }
+    },
+    {
+      id: "analytics",
+      type: "custom",
+      position: { x: 100, y: 560 },
+      data: {
+        label: "Analytics",
+        icon: <BarChart className="h-4 w-4" />,
+        technologies: ["Dashboard Analytics", "Data Visualization"],
+        description: "Performance monitoring and insights"
+      },
+      style: { background: "#FFF8EF", borderColor: "#FFDEC5" }
+    },
+    {
+      id: "reporting",
+      type: "custom",
+      position: { x: 400, y: 560 },
+      data: {
+        label: "Reporting",
+        icon: <FileText className="h-4 w-4" />,
+        technologies: ["Export Capabilities", "Custom Reports"],
+        description: "Data export and reporting tools"
+      },
+      style: { background: "#F0EFFF", borderColor: "#C5CAFF" }
     }
   ];
 
@@ -130,6 +155,30 @@ export const SystemArchitecture = () => {
         width: 15,
         height: 15
       }
+    },
+    { 
+      id: "ft-an", 
+      source: "features", 
+      target: "analytics",
+      animated: true,
+      style: { stroke: "#888" },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 15,
+        height: 15
+      }
+    },
+    { 
+      id: "ft-rp", 
+      source: "features", 
+      target: "reporting",
+      animated: true,
+      style: { stroke: "#888" },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 15,
+        height: 15
+      }
     }
   ];
 
@@ -146,7 +195,7 @@ export const SystemArchitecture = () => {
         </TabsList>
         
         <TabsContent value="visual" className="space-y-6">
-          <div className="h-[500px] bg-accent/20 rounded-md">
+          <div className="h-[600px] bg-accent/20 rounded-md">
             <ReactFlow
               nodes={nodes}
               edges={edges}
@@ -232,6 +281,40 @@ export const SystemArchitecture = () => {
                 </ul>
               </CardContent>
             </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <BarChart className="h-4 w-4 mr-2" />
+                  Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="list-disc list-inside space-y-2 text-sm">
+                  <li>Interactive dashboards for each panel</li>
+                  <li>KPI monitoring and visualization</li>
+                  <li>User behavior analytics</li>
+                  <li>Performance metrics tracking</li>
+                </ul>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Reporting
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="list-disc list-inside space-y-2 text-sm">
+                  <li>Customizable report generation</li>
+                  <li>Multiple export formats (PDF, CSV, Excel)</li>
+                  <li>Scheduled report delivery</li>
+                  <li>Filtered and segmented data views</li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
         
@@ -272,6 +355,14 @@ export const SystemArchitecture = () => {
                   <p className="text-sm text-muted-foreground">
                     WebSockets are used to push real-time updates from the server to the client,
                     enabling instant notifications and data refreshes without page reloads.
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium mb-2">Analytics & Reporting Integration</h3>
+                  <p className="text-sm text-muted-foreground">
+                    The feature layer feeds data to both analytics and reporting modules.
+                    Analytics processes data for visualization while reporting formats it for export.
                   </p>
                 </div>
               </div>
