@@ -1,11 +1,140 @@
-
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronRight, Lock, Server, LayoutGrid, Puzzle } from "lucide-react";
+import { Lock, Server, LayoutGrid, Puzzle } from "lucide-react";
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  MiniMap,
+  useNodesState,
+  useEdgesState,
+  MarkerType
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+
+interface NodeData {
+  label: string;
+  icon?: React.ReactNode;
+  technologies?: string[];
+  description?: string;
+}
+
+const CustomNode = ({ data }: { data: NodeData }) => {
+  return (
+    <div className="p-2 rounded-md border bg-white shadow-sm min-w-40">
+      <div className="flex items-center mb-1">
+        {data.icon && <div className="mr-2">{data.icon}</div>}
+        <div className="font-medium">{data.label}</div>
+      </div>
+      {data.technologies && (
+        <div className="text-xs text-muted-foreground">
+          {data.technologies.join(" • ")}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const nodeTypes = {
+  custom: CustomNode,
+};
 
 export const SystemArchitecture = () => {
   const [activeTab, setActiveTab] = useState<string>("visual");
+
+  const initialNodes = [
+    {
+      id: "security",
+      type: "custom",
+      position: { x: 250, y: 50 },
+      data: {
+        label: "Security Layer",
+        icon: <Lock className="h-4 w-4" />,
+        technologies: ["Auth0/JWT", "Encrypted DB"],
+        description: "Authentication and data protection"
+      },
+      style: { background: "#FFEFEF", borderColor: "#FFC5C5" }
+    },
+    {
+      id: "backend",
+      type: "custom",
+      position: { x: 250, y: 180 },
+      data: {
+        label: "Backend",
+        icon: <Server className="h-4 w-4" />,
+        technologies: ["Node.js + MongoDB", "REST API"],
+        description: "Server and database infrastructure"
+      },
+      style: { background: "#EFF8FF", borderColor: "#C5DCFF" }
+    },
+    {
+      id: "frontend",
+      type: "custom",
+      position: { x: 250, y: 310 },
+      data: {
+        label: "Frontend",
+        icon: <LayoutGrid className="h-4 w-4" />,
+        technologies: ["React + Bootstrap", "Responsive UI"],
+        description: "User interface components"
+      },
+      style: { background: "#EFFFEF", borderColor: "#C5FFC5" }
+    },
+    {
+      id: "features",
+      type: "custom",
+      position: { x: 250, y: 440 },
+      data: {
+        label: "Features",
+        icon: <Puzzle className="h-4 w-4" />,
+        technologies: ["Admin + Store + Delivery Panels", "Real-time Updates"],
+        description: "Application functionality"
+      },
+      style: { background: "#F8EFFF", borderColor: "#DCC5FF" }
+    }
+  ];
+
+  const initialEdges = [
+    { 
+      id: "s-b", 
+      source: "security", 
+      target: "backend",
+      animated: true,
+      style: { stroke: "#888" },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 15,
+        height: 15
+      }
+    },
+    { 
+      id: "b-f", 
+      source: "backend", 
+      target: "frontend",
+      animated: true,
+      style: { stroke: "#888" },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 15,
+        height: 15
+      }
+    },
+    { 
+      id: "f-ft", 
+      source: "frontend", 
+      target: "features",
+      animated: true,
+      style: { stroke: "#888" },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 15,
+        height: 15
+      }
+    }
+  ];
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   return (
     <div className="p-4 border rounded-lg">
@@ -17,100 +146,20 @@ export const SystemArchitecture = () => {
         </TabsList>
         
         <TabsContent value="visual" className="space-y-6">
-          <div className="overflow-auto p-4 rounded-md bg-accent/20">
-            <div className="min-w-[600px]">
-              {/* Architecture Map */}
-              <div className="space-y-8">
-                {/* Security Layer */}
-                <div className="flex items-center gap-2 justify-center">
-                  <Card className="w-40 h-20 bg-red-50 flex items-center justify-center p-0">
-                    <CardContent className="p-2 flex flex-col items-center">
-                      <Lock className="h-4 w-4 mb-1" />
-                      <span className="text-xs font-medium">Security</span>
-                    </CardContent>
-                  </Card>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  <Card className="w-40 h-20 bg-red-50 flex items-center justify-center p-0">
-                    <CardContent className="p-2 flex flex-col items-center">
-                      <span className="text-xs font-medium">Auth0/JWT</span>
-                    </CardContent>
-                  </Card>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  <Card className="w-40 h-20 bg-red-50 flex items-center justify-center p-0">
-                    <CardContent className="p-2 flex flex-col items-center">
-                      <span className="text-xs font-medium">Encrypted DB</span>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Backend Layer */}
-                <div className="flex items-center gap-2 justify-center">
-                  <Card className="w-40 h-20 bg-blue-50 flex items-center justify-center p-0">
-                    <CardContent className="p-2 flex flex-col items-center">
-                      <Server className="h-4 w-4 mb-1" />
-                      <span className="text-xs font-medium">Backend</span>
-                    </CardContent>
-                  </Card>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  <Card className="w-40 h-20 bg-blue-50 flex items-center justify-center p-0">
-                    <CardContent className="p-2 flex flex-col items-center">
-                      <span className="text-xs font-medium">Node.js + MongoDB</span>
-                    </CardContent>
-                  </Card>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  <Card className="w-40 h-20 bg-blue-50 flex items-center justify-center p-0">
-                    <CardContent className="p-2 flex flex-col items-center">
-                      <span className="text-xs font-medium">REST API</span>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Frontend Layer */}
-                <div className="flex items-center gap-2 justify-center">
-                  <Card className="w-40 h-20 bg-green-50 flex items-center justify-center p-0">
-                    <CardContent className="p-2 flex flex-col items-center">
-                      <LayoutGrid className="h-4 w-4 mb-1" />
-                      <span className="text-xs font-medium">Frontend</span>
-                    </CardContent>
-                  </Card>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  <Card className="w-40 h-20 bg-green-50 flex items-center justify-center p-0">
-                    <CardContent className="p-2 flex flex-col items-center">
-                      <span className="text-xs font-medium">React + Bootstrap</span>
-                    </CardContent>
-                  </Card>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  <Card className="w-40 h-20 bg-green-50 flex items-center justify-center p-0">
-                    <CardContent className="p-2 flex flex-col items-center">
-                      <span className="text-xs font-medium">Responsive UI</span>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Features Layer */}
-                <div className="flex items-center gap-2 justify-center">
-                  <Card className="w-40 h-20 bg-purple-50 flex items-center justify-center p-0">
-                    <CardContent className="p-2 flex flex-col items-center">
-                      <Puzzle className="h-4 w-4 mb-1" />
-                      <span className="text-xs font-medium">Features</span>
-                    </CardContent>
-                  </Card>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  <Card className="w-40 h-20 bg-purple-50 flex items-center justify-center p-0">
-                    <CardContent className="p-2 flex flex-col items-center">
-                      <span className="text-xs font-medium">Admin + Store + Delivery Panels</span>
-                      <span className="text-[10px]">Control Panels</span>
-                    </CardContent>
-                  </Card>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  <Card className="w-40 h-20 bg-purple-50 flex items-center justify-center p-0">
-                    <CardContent className="p-2 flex flex-col items-center">
-                      <span className="text-xs font-medium">Real-time Updates</span>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </div>
+          <div className="h-[500px] bg-accent/20 rounded-md">
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              nodeTypes={nodeTypes}
+              fitView
+              proOptions={{ hideAttribution: true }}
+            >
+              <Background color="#aaa" gap={16} />
+              <Controls />
+              <MiniMap nodeBorderRadius={2} />
+            </ReactFlow>
           </div>
         </TabsContent>
         
