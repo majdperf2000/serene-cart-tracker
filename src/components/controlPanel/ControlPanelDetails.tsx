@@ -13,7 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Info, Settings, Users, ShoppingCart, Truck, Package, MapPin } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Info, Settings, Users, ShoppingCart, Truck, Package, MapPin, Store } from "lucide-react";
 import { ControlPanelItem } from "./types";
 
 interface ControlPanelDetailsProps {
