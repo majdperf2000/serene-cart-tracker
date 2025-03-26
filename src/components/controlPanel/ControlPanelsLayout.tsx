@@ -2,15 +2,19 @@
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { ControlPanel } from "./ControlPanel";
 import { ControlPanelDetails } from "./ControlPanelDetails";
 import { controlPanelsData } from "./controlPanelData";
 import { ControlPanelItem } from "./types";
-import { LayoutDashboard, Store, Truck } from "lucide-react";
 
-const ControlPanelsLayout: React.FC = () => {
-  const [activeTab, setActiveTab] = useState(controlPanelsData[0].id);
+interface ControlPanelsLayoutProps {
+  initialActiveTab?: string;
+}
+
+const ControlPanelsLayout: React.FC<ControlPanelsLayoutProps> = ({ 
+  initialActiveTab = controlPanelsData[0].id 
+}) => {
+  const [activeTab, setActiveTab] = useState(initialActiveTab);
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>();
   
   const activePanel = controlPanelsData.find(panel => panel.id === activeTab);
@@ -43,19 +47,11 @@ const ControlPanelsLayout: React.FC = () => {
     setSelectedItemId(itemId);
   };
 
-  // Get appropriate icon for the panel
-  const getPanelIcon = (id: string) => {
-    switch (id) {
-      case "2": // ADMIN
-        return <LayoutDashboard className="h-4 w-4 mr-2" />;
-      case "3": // STORE OWNER
-        return <Store className="h-4 w-4 mr-2" />;
-      case "4": // DELIVERY
-        return <Truck className="h-4 w-4 mr-2" />;
-      default:
-        return null;
-    }
-  };
+  // Update active tab when initialActiveTab changes
+  useEffect(() => {
+    setActiveTab(initialActiveTab);
+    setSelectedItemId(undefined);
+  }, [initialActiveTab]);
 
   // Auto select the first item when changing tabs if nothing is selected
   useEffect(() => {
@@ -65,20 +61,15 @@ const ControlPanelsLayout: React.FC = () => {
   }, [activeTab, activePanel, selectedItemId]);
   
   return (
-    <div className="container mx-auto p-4 mb-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-        <h1 className="heading-2 mb-2 md:mb-0">لوحات التحكم</h1>
-        <Badge variant="outline" className="text-sm font-normal">
-          {activePanel?.description}
-        </Badge>
-      </div>
-      
+    <div className="w-full">
       <Tabs 
         defaultValue={activeTab} 
         value={activeTab}
         onValueChange={(value) => {
           setActiveTab(value);
           setSelectedItemId(undefined);
+          // Update the URL hash
+          window.location.hash = value;
         }}
         className="w-full"
       >
@@ -89,7 +80,6 @@ const ControlPanelsLayout: React.FC = () => {
               value={panel.id}
               className="flex-1 flex items-center justify-center gap-2"
             >
-              {getPanelIcon(panel.id)}
               {panel.title}
             </TabsTrigger>
           ))}
