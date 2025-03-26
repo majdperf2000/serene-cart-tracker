@@ -1,244 +1,257 @@
-
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
-import { ShoppingCart, User, Menu, X, Search, Globe } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import React, { useState } from "react";
+import {
+  LayoutDashboard,
+  Store,
+  Truck,
+  ShoppingCart,
+  User,
+  Map,
+  Menu,
+  X,
+  LogOut,
+  Settings,
+  ChevronDown,
+  AlertCircle
+} from "lucide-react";
+import { Link } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
-const navigation = [
-  { name: { en: "Home", ar: "الرئيسية" }, href: "/" },
-  { name: { en: "Products", ar: "المنتجات" }, href: "/products" },
-  { name: { en: "Stores", ar: "المتاجر" }, href: "/stores" },
-  { name: { en: "Track Orders", ar: "تتبع الطلبيات" }, href: "/order-tracking" },
-];
+interface MainLayoutProps {
+  children: React.ReactNode;
+}
 
-const MainLayout = ({ children }: { children: React.ReactNode }) => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'ar'>('en');
-  const location = useLocation();
+// نقوم بتعديل الملف ليتضمن روابط للوحات التحكم المختلفة
+const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const toggleLanguage = () => {
-    setLanguage(prev => prev === 'en' ? 'ar' : 'en');
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const dir = language === 'ar' ? 'rtl' : 'ltr';
+  const navLinks = [
+    { text: "الرئيسية", path: "/", icon: <LayoutDashboard className="h-4 w-4" /> },
+    { text: "المتاجر", path: "/stores", icon: <Store className="h-4 w-4" /> },
+    { text: "خريطة المتاجر", path: "/stores-map", icon: <Map className="h-4 w-4" /> },
+    { text: "السلة", path: "/cart", icon: <ShoppingCart className="h-4 w-4" /> },
+    { text: "تتبع الطلبات", path: "/order-tracking", icon: <Truck className="h-4 w-4" /> },
+  ];
 
-  useEffect(() => {
-    document.documentElement.dir = dir;
-    document.documentElement.lang = language;
-  }, [language, dir]);
+  // قائمة روابط لوحات التحكم
+  const controlPanelsLinks = [
+    { 
+      text: "لوحة تحكم المالك", 
+      path: "/control-panels#2", 
+      icon: <LayoutDashboard className="h-4 w-4" />,
+      notification: 5
+    },
+    { 
+      text: "لوحة تحكم المتاجر", 
+      path: "/control-panels#3", 
+      icon: <Store className="h-4 w-4" />,
+      notification: 2
+    },
+    { 
+      text: "لوحة تحكم التوصيل", 
+      path: "/control-panels#4", 
+      icon: <Truck className="h-4 w-4" />,
+      notification: 1
+    },
+    { 
+      text: "لوحة تحكم الأمان", 
+      path: "/control-panels#5", 
+      icon: <AlertCircle className="h-4 w-4" /> 
+    },
+  ];
 
   return (
-    <div className={`min-h-screen flex flex-col ${language === 'ar' ? 'font-arabic' : ''}`}>
-      <header 
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          isScrolled 
-            ? "py-3 glass" 
-            : "py-5 bg-transparent"
-        }`}
-      >
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center">
-              <span className="text-xl font-bold tracking-tight">Sweida Store</span>
+    <div className="flex flex-col min-h-screen">
+      {/* Header */}
+      <header className="border-b bg-background">
+        <div className="container flex h-14 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/" className="font-bold text-lg">
+              <span className="hidden md:inline">سوبر ماركت</span>
+              <span className="inline md:hidden">SM</span>
             </Link>
-            
-            <nav className="hidden md:flex items-center space-x-8">
-              {navigation.map((item) => (
+
+            {/* Desktop navigation */}
+            <nav className="hidden md:flex items-center gap-4">
+              {navLinks.map((link, index) => (
                 <Link
-                  key={item.name.en}
-                  to={item.href}
-                  className={`text-sm font-medium transition-colors hover:text-primary relative ${
-                    location.pathname === item.href
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }`}
+                  key={index}
+                  to={link.path}
+                  className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                 >
-                  {item.name[language]}
-                  {location.pathname === item.href && (
-                    <motion.div
-                      layoutId="navbar-indicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
+                  {link.icon}
+                  <span>{link.text}</span>
                 </Link>
               ))}
+
+              {/* لوحات التحكم Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors rounded-md outline-none relative">
+                    <Settings className="h-4 w-4" />
+                    <span>لوحات التحكم</span>
+                    <ChevronDown className="h-3 w-3" />
+                    {/* عرض عدد الإشعارات الإجمالي */}
+                    {controlPanelsLinks.reduce((sum, link) => sum + (link.notification || 0), 0) > 0 && (
+                      <span className="absolute -top-2 -right-2 h-4 w-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">
+                        {controlPanelsLinks.reduce((sum, link) => sum + (link.notification || 0), 0)}
+                      </span>
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>لوحات التحكم</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    {controlPanelsLinks.map((link, index) => (
+                      <DropdownMenuItem key={index} asChild>
+                        <Link 
+                          to={link.path} 
+                          className="flex items-center justify-between cursor-pointer w-full"
+                          onClick={() => {
+                            toast.success(`تم الانتقال إلى ${link.text}`, {
+                              description: "يمكنك الوصول إلى جميع الأدوات من القائمة الجانبية"
+                            });
+                          }}
+                        >
+                          <div className="flex items-center">
+                            {link.icon}
+                            <span className="mr-2">{link.text}</span>
+                          </div>
+                          {link.notification && (
+                            <span className="h-5 min-w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center px-1">
+                              {link.notification}
+                            </span>
+                          )}
+                        </Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </nav>
           </div>
-          
-          <div className="flex items-center gap-3">
-            {searchOpen ? (
-              <motion.div 
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: "auto", opacity: 1 }}
-                exit={{ width: 0, opacity: 0 }}
-                className="relative hidden md:flex"
-              >
-                <Input 
-                  placeholder={language === 'en' ? "Search products..." : "البحث عن منتجات..."} 
-                  className="w-[200px] pr-8" 
-                  autoFocus
-                  onBlur={() => setSearchOpen(false)}
-                />
-                <X 
-                  className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground cursor-pointer" 
-                  onClick={() => setSearchOpen(false)}
-                />
-              </motion.div>
-            ) : (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setSearchOpen(true)}
-                className="hidden md:flex"
-              >
-                <Search className="h-5 w-5" />
-              </Button>
-            )}
-            
+
+          <div className="flex items-center gap-4">
+            {/* User dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Globe className="h-5 w-5" />
-                </Button>
+                <button className="rounded-full overflow-hidden w-8 h-8 outline-none ring-primary transition focus-visible:ring-2">
+                  <div className="bg-muted h-full w-full flex items-center justify-center">
+                    <User className="h-4 w-4" />
+                  </div>
+                </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setLanguage('en')}>
-                  English
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLanguage('ar')}>
-                  العربية
-                </DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>حسابي</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="flex items-center cursor-pointer w-full">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      <span>لوحة التحكم</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/auth" className="flex items-center cursor-pointer w-full">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>تسجيل الخروج</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-            
-            <Link to="/order-tracking">
-              <Button variant="outline" size="sm" className="hidden md:flex">
-                {language === 'en' ? "Track Order" : "تتبع الطلبية"}
-              </Button>
-            </Link>
-            
-            <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-                  3
-                </span>
-              </Button>
-            </Link>
-            
-            <Link to="/auth">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-              </Button>
-            </Link>
-            
-            <Sheet>
-              <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="flex flex-col">
-                <div className="py-6 flex flex-col gap-6">
-                  {navigation.map((item) => (
-                    <Link
-                      key={item.name.en}
-                      to={item.href}
-                      className={`text-lg font-medium transition-colors ${
-                        location.pathname === item.href
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {item.name[language]}
-                    </Link>
-                  ))}
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to="/order-tracking">
-                      {language === 'en' ? "Track Order" : "تتبع الطلبية"}
-                    </Link>
-                  </Button>
-                </div>
-                <div className="mt-auto pt-6 border-t">
-                  <div className="relative flex-1">
-                    <Input placeholder={language === 'en' ? "Search products..." : "البحث عن منتجات..."} className="w-full" />
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+
+            {/* Mobile menu trigger */}
+            <button
+              className="block md:hidden"
+              onClick={toggleMobileMenu}
+              aria-label={isMobileMenuOpen ? "إغلاق القائمة" : "فتح القائمة"}
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
           </div>
         </div>
       </header>
-      
-      <main className="flex-1">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {children}
-        </motion.div>
-      </main>
-      
-      <footer className="border-t py-12 mt-24">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div>
-              <h3 className="font-semibold mb-4">Sweida Store</h3>
-              <p className="text-muted-foreground text-sm max-w-xs">
-                {language === 'en' 
-                  ? "Premium products delivered with exceptional service, right to your doorstep."
-                  : "منتجات ممتازة مع خدمة استثنائية، تصل مباشرة إلى باب منزلك."}
-              </p>
+
+      {/* Mobile navigation */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-b bg-background shadow-sm">
+          <nav className="container py-4 flex flex-col gap-2">
+            {navLinks.map((link, index) => (
+              <Link
+                key={index}
+                to={link.path}
+                className="flex items-center gap-2 py-2 px-3 rounded-md hover:bg-accent transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {link.icon}
+                <span>{link.text}</span>
+              </Link>
+            ))}
+            <div className="border-t my-2 pt-2">
+              <div className="text-sm font-medium px-3 py-1">لوحات التحكم</div>
+              {controlPanelsLinks.map((link, index) => (
+                <Link
+                  key={index}
+                  to={link.path}
+                  className="flex items-center justify-between gap-2 py-2 px-3 rounded-md hover:bg-accent transition-colors"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    toast.success(`تم الانتقال إلى ${link.text}`, {
+                      description: "يمكنك الوصول إلى جميع الأدوات من القائمة الجانبية"
+                    });
+                  }}
+                >
+                  <div className="flex items-center">
+                    {link.icon}
+                    <span className="mr-2">{link.text}</span>
+                  </div>
+                  {link.notification && (
+                    <span className="h-5 min-w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center px-1">
+                      {link.notification}
+                    </span>
+                  )}
+                </Link>
+              ))}
             </div>
-            <div>
-              <h3 className="font-semibold mb-4">
-                {language === 'en' ? "Quick Links" : "روابط سريعة"}
-              </h3>
-              <ul className="space-y-2">
-                {navigation.map((item) => (
-                  <li key={item.name.en}>
-                    <Link to={item.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                      {item.name[language]}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">
-                {language === 'en' ? "Contact" : "اتصل بنا"}  
-              </h3>
-              <address className="not-italic text-sm text-muted-foreground">
-                <p>{language === 'en' ? "Sweida Main Road" : "الطريق الرئيسي - السويداء"}</p>
-                <p>{language === 'en' ? "Sweida, Syria" : "السويداء، سوريا"}</p>
-                <p className="mt-3">contact@sweida-store.com</p>
-                <p>+963 123 456 789</p>
-              </address>
-            </div>
-          </div>
-          <div className="mt-12 pt-6 border-t text-sm text-muted-foreground text-center">
-            <p>© {new Date().getFullYear()} Sweida Store. {language === 'en' ? "All rights reserved." : "جميع الحقوق محفوظة."}</p>
+          </nav>
+        </div>
+      )}
+
+      {/* Main content */}
+      <main className="flex-1">{children}</main>
+
+      {/* Footer */}
+      <footer className="border-t py-6 bg-background">
+        <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-muted-foreground text-sm">
+          <div>© 2023 سوبر ماركت. جميع الحقوق محفوظة.</div>
+          <div className="flex gap-4">
+            <Link to="#" className="hover:text-foreground transition-colors">
+              من نحن
+            </Link>
+            <Link to="#" className="hover:text-foreground transition-colors">
+              اتصل بنا
+            </Link>
+            <Link to="#" className="hover:text-foreground transition-colors">
+              الشروط والأحكام
+            </Link>
           </div>
         </div>
       </footer>

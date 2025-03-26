@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { 
   Card, 
   CardContent, 
@@ -14,8 +14,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Info, Settings, Users, ShoppingCart, Truck, Package, MapPin, Store } from "lucide-react";
+import { Info, Settings, Users, ShoppingCart, Truck, Package, MapPin, Store, Download, Calendar, BarChart, Loader2 } from "lucide-react";
 import { ControlPanelItem } from "./types";
+import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ControlPanelDetailsProps {
   selectedItem?: ControlPanelItem;
@@ -26,6 +28,28 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
   selectedItem,
   panelType
 }) => {
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
+
+  const handleAction = (action: string, itemId: string) => {
+    setLoading(prev => ({ ...prev, [itemId]: true }));
+
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(prev => ({ ...prev, [itemId]: false }));
+      toast.success(`تم تنفيذ الإجراء "${action}" بنجاح`);
+    }, 1500);
+  };
+
+  const handleExport = (format: string) => {
+    setLoading(prev => ({ ...prev, [`export-${format}`]: true }));
+
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(prev => ({ ...prev, [`export-${format}`]: false }));
+      toast.success(`تم تصدير البيانات بتنسيق ${format} بنجاح`);
+    }, 1500);
+  };
+
   if (!selectedItem) {
     return (
       <Card className="h-full flex items-center justify-center">
@@ -87,8 +111,106 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
                 </div>
               </CardContent>
               <CardFooter>
-                <Button size="sm" variant="outline" className="w-full">تحديث الحالة</Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleAction("تحديث حالة النظام", "system-update")}
+                  disabled={loading["system-update"]}
+                >
+                  {loading["system-update"] ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      جاري التحديث...
+                    </>
+                  ) : (
+                    "تحديث الحالة"
+                  )}
+                </Button>
               </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">تقارير النظام</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="daily">
+                  <TabsList className="w-full mb-4">
+                    <TabsTrigger value="daily" className="flex-1">يومي</TabsTrigger>
+                    <TabsTrigger value="weekly" className="flex-1">أسبوعي</TabsTrigger>
+                    <TabsTrigger value="monthly" className="flex-1">شهري</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="daily" className="space-y-3">
+                    <div className="flex items-center justify-between p-2 border rounded-md">
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        <span>تقرير أداء اليوم</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleExport("PDF")}
+                        disabled={loading["export-PDF"]}
+                      >
+                        {loading["export-PDF"] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4 mr-1" />
+                            تصدير
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="weekly" className="space-y-3">
+                    <div className="flex items-center justify-between p-2 border rounded-md">
+                      <div className="flex items-center">
+                        <BarChart className="h-4 w-4 mr-2" />
+                        <span>تقرير الأداء الأسبوعي</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleExport("Excel")}
+                        disabled={loading["export-Excel"]}
+                      >
+                        {loading["export-Excel"] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4 mr-1" />
+                            تصدير
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="monthly" className="space-y-3">
+                    <div className="flex items-center justify-between p-2 border rounded-md">
+                      <div className="flex items-center">
+                        <BarChart className="h-4 w-4 mr-2" />
+                        <span>تقرير الأداء الشهري</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleExport("CSV")}
+                        disabled={loading["export-CSV"]}
+                      >
+                        {loading["export-CSV"] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4 mr-1" />
+                            تصدير
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
             </Card>
           </div>
         );
@@ -125,8 +247,68 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
                 </div>
               </CardContent>
               <CardFooter>
-                <Button size="sm" variant="outline" className="w-full">عرض جميع المعاملات</Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleAction("عرض جميع المعاملات", "view-transactions")}
+                >
+                  عرض جميع المعاملات
+                </Button>
               </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">تصدير التقارير المالية</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("PDF")}
+                      disabled={loading["export-PDF"]}
+                    >
+                      {loading["export-PDF"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          PDF
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("Excel")}
+                      disabled={loading["export-Excel"]}
+                    >
+                      {loading["export-Excel"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          Excel
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("CSV")}
+                      disabled={loading["export-CSV"]}
+                    >
+                      {loading["export-CSV"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          CSV
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
             </Card>
           </div>
         );
@@ -167,17 +349,66 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
                       <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
                         <Users className="h-4 w-4" />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <p className="text-sm font-medium">مستخدم جديد #{i+1}</p>
                         <p className="text-xs text-muted-foreground">انضم منذ {i+1} ساعة</p>
                       </div>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleAction("عرض تفاصيل المستخدم", `user-${i}`)}
+                      >
+                        التفاصيل
+                      </Button>
                     </div>
                   ))}
                 </div>
               </CardContent>
               <CardFooter>
-                <Button size="sm" variant="outline" className="w-full">إدارة المستخدمين</Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleAction("إدارة المستخدمين", "manage-users")}
+                >
+                  إدارة المستخدمين
+                </Button>
               </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">الإحصائيات والتحليلات</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="users">
+                  <TabsList className="w-full mb-4">
+                    <TabsTrigger value="users" className="flex-1">المستخدمين</TabsTrigger>
+                    <TabsTrigger value="stores" className="flex-1">المتاجر</TabsTrigger>
+                    <TabsTrigger value="drivers" className="flex-1">السائقين</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="users" className="space-y-3">
+                    <Progress value={85} className="h-2 mb-1" />
+                    <div className="flex justify-between text-xs">
+                      <span>معدل نمو المستخدمين: 85%</span>
+                      <span>الهدف: 90%</span>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="stores" className="space-y-3">
+                    <Progress value={72} className="h-2 mb-1" />
+                    <div className="flex justify-between text-xs">
+                      <span>معدل نمو المتاجر: 72%</span>
+                      <span>الهدف: 80%</span>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="drivers" className="space-y-3">
+                    <Progress value={63} className="h-2 mb-1" />
+                    <div className="flex justify-between text-xs">
+                      <span>معدل نمو السائقين: 63%</span>
+                      <span>الهدف: 75%</span>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
             </Card>
           </div>
         );
@@ -221,14 +452,90 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
                           <p className="text-xs text-muted-foreground">المخزون: {50 - i*5}</p>
                         </div>
                       </div>
-                      <p className="text-sm font-bold">{120 + i*10} مبيعات</p>
+                      <div className="flex gap-2">
+                        <Badge variant={i < 2 ? "destructive" : "outline"}>
+                          {i < 2 ? "نفاد وشيك" : "متوفر"}
+                        </Badge>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleAction("طلب توريد", `restock-${i}`)}
+                          disabled={loading[`restock-${i}`]}
+                        >
+                          {loading[`restock-${i}`] ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            "توريد"
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
               </CardContent>
               <CardFooter>
-                <Button size="sm" variant="outline" className="w-full">إدارة المخزون</Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleAction("إدارة المخزون", "manage-inventory")}
+                >
+                  إدارة المخزون
+                </Button>
               </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">تقارير المخزون</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("PDF")}
+                      disabled={loading["export-PDF"]}
+                    >
+                      {loading["export-PDF"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير PDF
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("Excel")}
+                      disabled={loading["export-Excel"]}
+                    >
+                      {loading["export-Excel"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير Excel
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("CSV")}
+                      disabled={loading["export-CSV"]}
+                    >
+                      {loading["export-CSV"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير CSV
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
             </Card>
           </div>
         );
@@ -272,10 +579,13 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
                         <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
                           <Users className="h-4 w-4" />
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <p className="text-sm font-medium">عميل #{i+1}</p>
                           <p className="text-xs text-muted-foreground">منذ {i+1} أيام</p>
                         </div>
+                        <Badge variant={i === 0 ? "default" : i === 1 ? "secondary" : "outline"}>
+                          {i === 0 ? "5 نجوم" : i === 1 ? "4 نجوم" : "3 نجوم"}
+                        </Badge>
                       </div>
                       <p className="text-sm">
                         {i === 0 ? "خدمة ممتازة وتوصيل سريع!" : 
@@ -287,8 +597,80 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
                 </div>
               </CardContent>
               <CardFooter>
-                <Button size="sm" variant="outline" className="w-full">عرض جميع التعليقات</Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleAction("عرض جميع التعليقات", "view-comments")}
+                >
+                  عرض جميع التعليقات
+                </Button>
               </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">تقارير العملاء</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="satisfaction">
+                  <TabsList className="w-full mb-4">
+                    <TabsTrigger value="satisfaction" className="flex-1">الرضا</TabsTrigger>
+                    <TabsTrigger value="retention" className="flex-1">الاحتفاظ</TabsTrigger>
+                    <TabsTrigger value="behavior" className="flex-1">السلوك</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="satisfaction" className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("PDF")}
+                      disabled={loading["export-PDF"]}
+                      className="w-full"
+                    >
+                      {loading["export-PDF"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير تقرير الرضا
+                        </>
+                      )}
+                    </Button>
+                  </TabsContent>
+                  <TabsContent value="retention" className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("Excel")}
+                      disabled={loading["export-Excel"]}
+                      className="w-full"
+                    >
+                      {loading["export-Excel"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير تقرير الاحتفاظ
+                        </>
+                      )}
+                    </Button>
+                  </TabsContent>
+                  <TabsContent value="behavior" className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("CSV")}
+                      disabled={loading["export-CSV"]}
+                      className="w-full"
+                    >
+                      {loading["export-CSV"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير تقرير السلوك
+                        </>
+                      )}
+                    </Button>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
             </Card>
           </div>
         );
@@ -334,14 +716,114 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
                            i === 2 ? "تم التسليم" : "جديد"}
                         </p>
                       </div>
-                      <Button size="sm" variant="outline">تفاصيل</Button>
+                      <div className="flex gap-2">
+                        <Badge variant={
+                          i === 0 ? "secondary" : 
+                          i === 1 ? "default" : 
+                          i === 2 ? "outline" : 
+                          "destructive"
+                        }>
+                          {i === 0 ? "منذ 15 دقيقة" : 
+                           i === 1 ? "منذ 45 دقيقة" : 
+                           i === 2 ? "منذ 3 ساعات" : 
+                           "جديد"}
+                        </Badge>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleAction("عرض تفاصيل الطلب", `order-${i}`)}
+                        >
+                          تفاصيل
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
               </CardContent>
               <CardFooter>
-                <Button size="sm" variant="outline" className="w-full">إدارة جميع الطلبات</Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleAction("إدارة جميع الطلبات", "manage-orders")}
+                >
+                  إدارة جميع الطلبات
+                </Button>
               </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">تقارير الطلبات</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="today">
+                  <TabsList className="w-full mb-4">
+                    <TabsTrigger value="today" className="flex-1">اليوم</TabsTrigger>
+                    <TabsTrigger value="week" className="flex-1">الأسبوع</TabsTrigger>
+                    <TabsTrigger value="month" className="flex-1">الشهر</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="today" className="space-y-3">
+                    <div className="flex items-center justify-between p-2 border rounded-md">
+                      <span>تقرير طلبات اليوم</span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleExport("PDF")}
+                        disabled={loading["export-PDF"]}
+                      >
+                        {loading["export-PDF"] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4 mr-1" />
+                            تصدير
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="week" className="space-y-3">
+                    <div className="flex items-center justify-between p-2 border rounded-md">
+                      <span>تقرير طلبات الأسبوع</span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleExport("Excel")}
+                        disabled={loading["export-Excel"]}
+                      >
+                        {loading["export-Excel"] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4 mr-1" />
+                            تصدير
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="month" className="space-y-3">
+                    <div className="flex items-center justify-between p-2 border rounded-md">
+                      <span>تقرير طلبات الشهر</span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleExport("CSV")}
+                        disabled={loading["export-CSV"]}
+                      >
+                        {loading["export-CSV"] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4 mr-1" />
+                            تصدير
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
             </Card>
           </div>
         );
@@ -380,8 +862,29 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
               </CardContent>
               <CardFooter>
                 <div className="grid grid-cols-2 gap-2 w-full">
-                  <Button size="sm" variant="outline">تحديث المسار</Button>
-                  <Button size="sm">بدء التنقل</Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleAction("تحديث المسار", "update-route")}
+                    disabled={loading["update-route"]}
+                  >
+                    {loading["update-route"] ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "تحديث المسار"
+                    )}
+                  </Button>
+                  <Button 
+                    size="sm"
+                    onClick={() => handleAction("بدء التنقل", "start-navigation")}
+                    disabled={loading["start-navigation"]}
+                  >
+                    {loading["start-navigation"] ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "بدء التنقل"
+                    )}
+                  </Button>
                 </div>
               </CardFooter>
             </Card>
@@ -405,6 +908,68 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
                     <span className="text-sm font-medium">48 كم</span>
                   </div>
                 </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleAction("التحقق من صيانة المركبة", "check-maintenance")}
+                  disabled={loading["check-maintenance"]}
+                >
+                  {loading["check-maintenance"] ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "التحقق من الصيانة"
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">تقارير المسارات</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="today">
+                  <TabsList className="w-full mb-4">
+                    <TabsTrigger value="today" className="flex-1">اليوم</TabsTrigger>
+                    <TabsTrigger value="week" className="flex-1">الأسبوع</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="today" className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("PDF")}
+                      disabled={loading["export-PDF"]}
+                      className="w-full"
+                    >
+                      {loading["export-PDF"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير مسارات اليوم
+                        </>
+                      )}
+                    </Button>
+                  </TabsContent>
+                  <TabsContent value="week" className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("Excel")}
+                      disabled={loading["export-Excel"]}
+                      className="w-full"
+                    >
+                      {loading["export-Excel"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير مسارات الأسبوع
+                        </>
+                      )}
+                    </Button>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </div>
@@ -433,8 +998,31 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
                         </Badge>
                       </div>
                       <div className="flex justify-between gap-2 mt-2">
-                        <Button size="sm" variant="outline" className="flex-1">اتصال</Button>
-                        <Button size="sm" className="flex-1">إرسال ETA</Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => handleAction("اتصال بالعميل", `call-customer-${i}`)}
+                          disabled={loading[`call-customer-${i}`]}
+                        >
+                          {loading[`call-customer-${i}`] ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            "اتصال"
+                          )}
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => handleAction("إرسال وقت الوصول المتوقع", `send-eta-${i}`)}
+                          disabled={loading[`send-eta-${i}`]}
+                        >
+                          {loading[`send-eta-${i}`] ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            "إرسال ETA"
+                          )}
+                        </Button>
                       </div>
                     </Card>
                   ))}
@@ -460,11 +1048,81 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
                       </div>
                     </div>
                     <div className="flex gap-2 mt-3">
-                      <Button size="sm" variant="outline" className="flex-1">التقاط صورة</Button>
-                      <Button size="sm" className="flex-1">تأكيد التسليم</Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex-1"
+                        onClick={() => handleAction("التقاط صورة", "take-photo")}
+                        disabled={loading["take-photo"]}
+                      >
+                        {loading["take-photo"] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "التقاط صورة"
+                        )}
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleAction("تأكيد التسليم", "confirm-delivery")}
+                        disabled={loading["confirm-delivery"]}
+                      >
+                        {loading["confirm-delivery"] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "تأكيد التسليم"
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">تقارير التسليم</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="today">
+                  <TabsList className="w-full mb-4">
+                    <TabsTrigger value="today" className="flex-1">اليوم</TabsTrigger>
+                    <TabsTrigger value="week" className="flex-1">الأسبوع</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="today" className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("PDF")}
+                      disabled={loading["export-PDF"]}
+                      className="w-full"
+                    >
+                      {loading["export-PDF"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير تقرير اليوم
+                        </>
+                      )}
+                    </Button>
+                  </TabsContent>
+                  <TabsContent value="week" className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("Excel")}
+                      disabled={loading["export-Excel"]}
+                      className="w-full"
+                    >
+                      {loading["export-Excel"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير تقرير الأسبوع
+                        </>
+                      )}
+                    </Button>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </div>
@@ -502,8 +1160,80 @@ export const ControlPanelDetails: React.FC<ControlPanelDetailsProps> = ({
                 </div>
               </CardContent>
               <CardFooter>
-                <Button size="sm" variant="outline" className="w-full">عرض التقرير الكامل</Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => handleAction("عرض التقرير الكامل", "full-report")}
+                >
+                  عرض التقرير الكامل
+                </Button>
               </CardFooter>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">تقارير الأرباح</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="daily">
+                  <TabsList className="w-full mb-4">
+                    <TabsTrigger value="daily" className="flex-1">يومي</TabsTrigger>
+                    <TabsTrigger value="weekly" className="flex-1">أسبوعي</TabsTrigger>
+                    <TabsTrigger value="monthly" className="flex-1">شهري</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="daily" className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("PDF")}
+                      disabled={loading["export-PDF"]}
+                      className="w-full"
+                    >
+                      {loading["export-PDF"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير التقرير اليومي
+                        </>
+                      )}
+                    </Button>
+                  </TabsContent>
+                  <TabsContent value="weekly" className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("Excel")}
+                      disabled={loading["export-Excel"]}
+                      className="w-full"
+                    >
+                      {loading["export-Excel"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير التقرير الأسبوعي
+                        </>
+                      )}
+                    </Button>
+                  </TabsContent>
+                  <TabsContent value="monthly" className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleExport("CSV")}
+                      disabled={loading["export-CSV"]}
+                      className="w-full"
+                    >
+                      {loading["export-CSV"] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Download className="h-4 w-4 mr-1" />
+                          تصدير التقرير الشهري
+                        </>
+                      )}
+                    </Button>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
             </Card>
           </div>
         );
