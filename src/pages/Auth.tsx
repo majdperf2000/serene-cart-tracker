@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -6,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { toast as sonnerToast } from "sonner"; // Import sonner toast for success notifications
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -26,19 +28,19 @@ const Auth = () => {
       // Redirect based on account type
       if (accountType === "delivery") {
         navigate("/delivery-dashboard");
-        toast.success("تم تسجيل دخول سائق التوصيل بنجاح");
+        sonnerToast.success("تم تسجيل دخول سائق التوصيل بنجاح");
       } else if (accountType === "store") {
         navigate("/store-owner");
-        toast.success("تم تسجيل دخول صاحب المتجر بنجاح");
+        sonnerToast.success("تم تسجيل دخول صاحب المتجر بنجاح");
       } else if (accountType === "customer") {
         navigate("/dashboard");
-        toast.success("تم تسجيل دخول العميل بنجاح");
+        sonnerToast.success("تم تسجيل دخول العميل بنجاح");
       } else if (accountType === "admin") {
         navigate("/control-panels");
-        toast.success("تم تسجيل دخول المدير بنجاح");
+        sonnerToast.success("تم تسجيل دخول المدير بنجاح");
       } else {
         navigate("/dashboard");
-        toast.success("تم تسجيل الدخول بنجاح");
+        sonnerToast.success("تم تسجيل الدخول بنجاح");
       }
     }, 1500);
   };

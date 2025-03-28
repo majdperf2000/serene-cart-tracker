@@ -13,7 +13,9 @@ import {
   FileWarning,
   Download,
   FileCheck,
-  Shield
+  Shield,
+  Fuel, // Add missing Fuel icon
+  Check  // Add missing Check icon
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
