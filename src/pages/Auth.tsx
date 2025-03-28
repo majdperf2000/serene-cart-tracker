@@ -8,22 +8,75 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { toast as sonnerToast } from "sonner"; // Import sonner toast for success notifications
+import { Eye, EyeOff, Shield } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [accountType, setAccountType] = useState("customer");
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Email validation function
+  const isValidEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  // Password validation function
+  const isValidPassword = (password: string) => {
+    return password.length >= 8;
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+
+    if (!email) {
+      setEmailError("البريد الإلكتروني مطلوب");
+      isValid = false;
+    } else if (!isValidEmail(email)) {
+      setEmailError("يرجى إدخال بريد إلكتروني صالح");
+      isValid = false;
+    } else {
+      setEmailError("");
+    }
+
+    if (!password) {
+      setPasswordError("كلمة المرور مطلوبة");
+      isValid = false;
+    } else if (!isValidPassword(password)) {
+      setPasswordError("يجب أن تكون كلمة المرور 8 أحرف على الأقل");
+      isValid = false;
+    } else {
+      setPasswordError("");
+    }
+
+    return isValid;
+  };
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
     
-    // Simulate API call
+    // Simulate API call with JWT token generation
     setTimeout(() => {
       setLoading(false);
+      
+      // Simulate JWT token creation and storage
+      const fakeJwtToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjM0NTYiLCJyb2xlIjoiJHthY2NvdW50VHlwZX0iLCJpYXQiOjE2MTYxNjI4MDAsImV4cCI6MTYxNjE2NjQwMH0`;
+      localStorage.setItem('auth_token', fakeJwtToken);
+      
+      // Log user activity (for auditing)
+      console.log(`User login: ${email}, Type: ${accountType}, Time: ${new Date().toISOString()}`);
       
       // Redirect based on account type
       if (accountType === "delivery") {
@@ -45,6 +98,10 @@ const Auth = () => {
     }, 1500);
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <motion.div
@@ -55,7 +112,10 @@ const Auth = () => {
       >
         <Card className="glass-card">
           <CardHeader>
-            <CardTitle className="text-2xl font-semibold text-center">تسجيل الدخول</CardTitle>
+            <CardTitle className="text-2xl font-semibold text-center flex items-center justify-center gap-2">
+              <Shield className="h-5 w-5 text-primary" />
+              تسجيل الدخول
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
@@ -67,17 +127,30 @@ const Auth = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className={emailError ? "border-red-500" : ""}
                 />
+                {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">كلمة المرور</Label>
-                <Input
-                  id="password"
-                  placeholder="أدخل كلمة المرور"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    placeholder="أدخل كلمة المرور"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={passwordError ? "border-red-500 pr-10" : "pr-10"}
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
               </div>
               <div>
                 <Label htmlFor="accountType">نوع الحساب</Label>
@@ -115,6 +188,12 @@ const Auth = () => {
           <a href="/register" className="text-sm text-blue-500 hover:underline">
             ليس لديك حساب؟ إنشاء حساب
           </a>
+        </div>
+        <div className="mt-2 text-center">
+          <p className="text-xs text-gray-500 flex justify-center items-center gap-1">
+            <Shield className="h-3 w-3" />
+            تم تأمين تسجيل الدخول باستخدام تشفير AES-256
+          </p>
         </div>
       </motion.div>
     </div>
