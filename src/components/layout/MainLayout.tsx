@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   LayoutDashboard,
@@ -11,7 +12,9 @@ import {
   LogOut,
   Settings,
   ChevronDown,
-  AlertCircle
+  AlertCircle,
+  Home,
+  Search
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -23,22 +26,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import MainNavigation from "./MainNavigation";
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
-// نقوم بتعديل الملف ليتضمن روابط للوحات التحكم المختلفة
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      toast.info(`جاري البحث عن: ${searchQuery}`);
+      // Implementation of search functionality would go here
+      setSearchQuery("");
+    }
+  };
+
   const navLinks = [
-    { text: "الرئيسية", path: "/", icon: <LayoutDashboard className="h-4 w-4" /> },
+    { text: "الرئيسية", path: "/", icon: <Home className="h-4 w-4" /> },
     { text: "المتاجر", path: "/stores", icon: <Store className="h-4 w-4" /> },
     { text: "خريطة المتاجر", path: "/stores-map", icon: <Map className="h-4 w-4" /> },
     { text: "السلة", path: "/cart", icon: <ShoppingCart className="h-4 w-4" /> },
@@ -75,76 +90,43 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <header className="border-b bg-background">
-        <div className="container flex h-14 items-center justify-between">
+      <header className="border-b bg-background sticky top-0 z-50">
+        <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/" className="font-bold text-lg">
+            <Link to="/" className="font-bold text-xl">
               <span className="hidden md:inline">سوبر ماركت</span>
               <span className="inline md:hidden">SM</span>
             </Link>
 
             {/* Desktop navigation */}
-            <nav className="hidden md:flex items-center gap-4">
-              {navLinks.map((link, index) => (
-                <Link
-                  key={index}
-                  to={link.path}
-                  className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-                >
-                  {link.icon}
-                  <span>{link.text}</span>
-                </Link>
-              ))}
-
-              {/* لوحات التحكم Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors rounded-md outline-none relative">
-                    <Settings className="h-4 w-4" />
-                    <span>لوحات التحكم</span>
-                    <ChevronDown className="h-3 w-3" />
-                    {/* عرض عدد الإشعارات الإجمالي */}
-                    {controlPanelsLinks.reduce((sum, link) => sum + (link.notification || 0), 0) > 0 && (
-                      <span className="absolute -top-2 -right-2 h-4 w-4 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">
-                        {controlPanelsLinks.reduce((sum, link) => sum + (link.notification || 0), 0)}
-                      </span>
-                    )}
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>لوحات التحكم</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    {controlPanelsLinks.map((link, index) => (
-                      <DropdownMenuItem key={index} asChild>
-                        <Link 
-                          to={link.path} 
-                          className="flex items-center justify-between cursor-pointer w-full"
-                          onClick={() => {
-                            toast.success(`تم الانتقال إلى ${link.text}`, {
-                              description: "يمكنك الوصول إلى جميع الأدوات من القائمة الجانبية"
-                            });
-                          }}
-                        >
-                          <div className="flex items-center">
-                            {link.icon}
-                            <span className="mr-2">{link.text}</span>
-                          </div>
-                          {link.notification && (
-                            <span className="h-5 min-w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center px-1">
-                              {link.notification}
-                            </span>
-                          )}
-                        </Link>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </nav>
+            <MainNavigation />
           </div>
 
+          {/* Search Bar - Visible on all screens */}
+          <form onSubmit={handleSearch} className="flex-1 mx-4 hidden md:flex">
+            <div className="relative w-full max-w-md mx-auto">
+              <Input
+                type="search"
+                placeholder="ابحث عن متجر أو منتج..."
+                className="w-full pr-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button type="submit" className="absolute left-2 top-1/2 transform -translate-y-1/2">
+                <Search className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+          </form>
+
           <div className="flex items-center gap-4">
+            {/* Cart Icon - Always visible */}
+            <Link to="/cart" className="relative">
+              <ShoppingCart className="h-5 w-5" />
+              <span className="absolute -top-2 -right-2 h-4 w-4 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                0
+              </span>
+            </Link>
+
             {/* User dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -160,13 +142,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
                     <Link to="/dashboard" className="flex items-center cursor-pointer w-full">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      <LayoutDashboard className="ml-2 h-4 w-4" />
                       <span>لوحة التحكم</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/auth" className="flex items-center cursor-pointer w-full">
-                      <LogOut className="mr-2 h-4 w-4" />
+                      <LogOut className="ml-2 h-4 w-4" />
                       <span>تسجيل الخروج</span>
                     </Link>
                   </DropdownMenuItem>
@@ -189,6 +171,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </div>
         </div>
       </header>
+
+      {/* Mobile search bar */}
+      <div className="md:hidden border-b bg-background p-2">
+        <form onSubmit={handleSearch} className="flex">
+          <Input
+            type="search"
+            placeholder="ابحث عن متجر أو منتج..."
+            className="w-full pr-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <Button type="submit" variant="ghost" size="icon" className="ml-1">
+            <Search className="h-4 w-4" />
+          </Button>
+        </form>
+      </div>
 
       {/* Mobile navigation */}
       {isMobileMenuOpen && (

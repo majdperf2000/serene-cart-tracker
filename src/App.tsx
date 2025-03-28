@@ -1,3 +1,4 @@
+
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Index from "@/pages/Index";
@@ -65,7 +66,7 @@ const router = createBrowserRouter([
     element: <Stores />,
   },
   {
-    path: "/stores/map",
+    path: "/stores-map",
     element: <StoresMap />,
   },
   {
