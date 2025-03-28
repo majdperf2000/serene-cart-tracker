@@ -55,8 +55,8 @@ const Auth = () => {
         navigate("/dashboard");
         break;
       case "store":
-        // رمز لوحة متاجر هو 3
-        navigate("/control-panels#3");
+        // توجيه صاحب المتجر إلى لوحة تحكم المتجر الجديدة
+        navigate("/store-owner-dashboard");
         break;
       case "delivery":
         // رمز لوحة التوصيل هو 4
