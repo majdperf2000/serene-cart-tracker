@@ -16,7 +16,8 @@ import {
   Grid,
   BarChart,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Users
 } from "lucide-react";
 
 const SalesReports = () => {

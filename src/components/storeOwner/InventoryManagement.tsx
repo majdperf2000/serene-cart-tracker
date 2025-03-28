@@ -52,7 +52,7 @@ const InventoryManagement = () => {
   const getStatusBadge = (status) => {
     switch (status) {
       case "low":
-        return <Badge variant="warning" className="bg-yellow-500">منخفض</Badge>;
+        return <Badge variant="secondary" className="bg-yellow-500">منخفض</Badge>;
       case "out":
         return <Badge variant="destructive">نفد</Badge>;
       case "overstock":
