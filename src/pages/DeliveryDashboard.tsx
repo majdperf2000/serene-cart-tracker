@@ -11,6 +11,7 @@ import LiveTracking from "@/components/delivery/LiveTracking";
 import DriverManagement from "@/components/delivery/DriverManagement";
 import RouteOptimization from "@/components/delivery/RouteOptimization";
 import FleetAnalytics from "@/components/delivery/FleetAnalytics";
+import DeliverySystemStructure from "@/components/delivery/DeliverySystemStructure";
 
 const DeliveryDashboard = () => {
   const [activeTab, setActiveTab] = useState("orders");
@@ -27,13 +28,18 @@ const DeliveryDashboard = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-5 mb-8">
+            <TabsList className="grid grid-cols-6 mb-8">
+              <TabsTrigger value="structure">الهيكل العام</TabsTrigger>
               <TabsTrigger value="orders">إدارة الطلبات</TabsTrigger>
               <TabsTrigger value="tracking">التتبع المباشر</TabsTrigger>
               <TabsTrigger value="drivers">إدارة السائقين</TabsTrigger>
               <TabsTrigger value="routes">تحسين المسارات</TabsTrigger>
               <TabsTrigger value="fleet">تحليلات الأسطول</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="structure" className="w-full">
+              <DeliverySystemStructure />
+            </TabsContent>
 
             <TabsContent value="orders" className="w-full">
               <OrderAssignment />

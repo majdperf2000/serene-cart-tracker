@@ -1,467 +1,440 @@
 
 import React, { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import DeliveryTypeSelection from "./DeliveryTypeSelection";
+import { Button } from "@/components/ui/button";
 import { 
-  PackageCheck, 
-  PackageX, 
-  PackagePlus, 
-  TrendingUp, 
+  Truck, 
+  User, 
+  Package, 
+  FileCheck, 
   Clock, 
   MapPin,
-  AlertTriangle,
-  RefreshCw
+  BarChart4,
+  Sliders,
+  Filter
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/components/ui/table";
 import { toast } from "sonner";
 
-// Mock data for orders
-const orders = [
-  { 
-    id: "ORD-2589", 
-    customer: "أحمد محمد", 
-    location: "دمشق - المزة", 
-    status: "pending", 
-    priority: "high", 
-    items: 3, 
-    timestamp: "منذ 15 دقيقة",
-    distance: "1.2 كم" 
-  },
-  { 
-    id: "ORD-2590", 
-    customer: "محمد علي", 
-    location: "دمشق - مشروع دمر", 
-    status: "assigned", 
-    priority: "medium", 
-    items: 1, 
-    timestamp: "منذ 30 دقيقة",
-    distance: "3.5 كم"
-  },
-  { 
-    id: "ORD-2591", 
-    customer: "سارة أحمد", 
-    location: "دمشق - المهاجرين", 
-    status: "pending", 
-    priority: "low", 
-    items: 2, 
-    timestamp: "منذ 45 دقيقة",
-    distance: "4.7 كم"
-  },
-  { 
-    id: "ORD-2592", 
-    customer: "خالد محمود", 
-    location: "دمشق - الروضة", 
-    status: "pending", 
-    priority: "high", 
-    items: 5, 
-    timestamp: "منذ 10 دقيقة",
-    distance: "2.1 كم"
-  },
-  { 
-    id: "ORD-2593", 
-    customer: "فاطمة علي", 
-    location: "دمشق - القصاع", 
-    status: "assigned", 
-    priority: "medium", 
-    items: 2, 
-    timestamp: "منذ 50 دقيقة",
-    distance: "5.3 كم"
-  }
-];
-
-// Mock data for drivers
-const drivers = [
-  { 
-    id: "DRV-143", 
-    name: "عمر حسن", 
-    status: "available", 
-    currentLoad: 4, 
-    maxCapacity: 15, 
-    location: "المزة",
-    rating: 4.8
-  },
-  { 
-    id: "DRV-156", 
-    name: "حسام علي", 
-    status: "busy", 
-    currentLoad: 13, 
-    maxCapacity: 15, 
-    location: "الروضة",
-    rating: 4.6
-  },
-  { 
-    id: "DRV-178", 
-    name: "ليلى سعيد", 
-    status: "available", 
-    currentLoad: 7, 
-    maxCapacity: 15, 
-    location: "ركن الدين",
-    rating: 4.9
-  },
-  { 
-    id: "DRV-192", 
-    name: "ماهر عباس", 
-    status: "available", 
-    currentLoad: 0, 
-    maxCapacity: 15, 
-    location: "المزة",
-    rating: 4.7
-  }
-];
-
 const OrderAssignment = () => {
-  const [activeTab, setActiveTab] = useState("pending");
-  const [isAutoAssignEnabled, setIsAutoAssignEnabled] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
   
+  const orders = [
+    { id: "ORD-1001", customer: "محمد علي", address: "شارع الملك فهد، الرياض", items: 3, priority: "high", assignedTo: null, vehicle: "car", eta: "30 دقيقة" },
+    { id: "ORD-1002", customer: "فاطمة أحمد", address: "شارع التحلية، جدة", items: 1, priority: "medium", assignedTo: "أحمد محمود", vehicle: "motorcycle", eta: "15 دقيقة" },
+    { id: "ORD-1003", customer: "خالد عبدالله", address: "شارع الأمير سلطان، الدمام", items: 5, priority: "low", assignedTo: null, vehicle: "truck", eta: "45 دقيقة" },
+    { id: "ORD-1004", customer: "نورة سعيد", address: "شارع الستين، مكة المكرمة", items: 2, priority: "high", assignedTo: "محمد فهد", vehicle: "bicycle", eta: "20 دقيقة" },
+  ];
+
+  const drivers = [
+    { id: "DRV-501", name: "عبدالله محمد", status: "available", vehicle: "car", location: "الرياض، حي الورود", capacity: 7, orders: 4 },
+    { id: "DRV-502", name: "سارة أحمد", status: "busy", vehicle: "motorcycle", location: "الرياض، حي الملز", capacity: 3, orders: 3 },
+    { id: "DRV-503", name: "فهد عبدالرحمن", status: "available", vehicle: "truck", location: "الرياض، حي النزهة", capacity: 15, orders: 8 },
+    { id: "DRV-504", name: "محمد علي", status: "available", vehicle: "bicycle", location: "الرياض، حي الروضة", capacity: 2, orders: 0 },
+  ];
+
+  // دالة لعرض شارة الأولوية
   const getPriorityBadge = (priority) => {
-    switch (priority) {
+    switch(priority) {
       case "high":
-        return <Badge variant="destructive">عالية</Badge>;
+        return <Badge className="bg-red-500">عالية</Badge>;
       case "medium":
-        return <Badge variant="secondary" className="bg-yellow-500">متوسطة</Badge>;
+        return <Badge className="bg-yellow-500">متوسطة</Badge>;
       case "low":
-        return <Badge variant="outline">منخفضة</Badge>;
+        return <Badge className="bg-green-500">منخفضة</Badge>;
       default:
-        return <Badge variant="outline">عادية</Badge>;
+        return <Badge variant="outline">غير محددة</Badge>;
     }
   };
-  
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case "pending":
-        return <Badge variant="secondary" className="bg-blue-500 text-white">قيد الانتظار</Badge>;
-      case "assigned":
-        return <Badge variant="secondary" className="bg-green-500 text-white">تم التعيين</Badge>;
-      case "delivered":
-        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">تم التوصيل</Badge>;
-      case "cancelled":
-        return <Badge variant="destructive">ملغي</Badge>;
+
+  // دالة لعرض أيقونة المركبة
+  const getVehicleIcon = (vehicle) => {
+    switch(vehicle) {
+      case "truck":
+        return <Truck className="h-4 w-4" />;
+      case "car":
+        return <Car className="h-4 w-4" />;
+      case "motorcycle":
+        return <Bike className="h-4 w-4" />;
+      case "bicycle":
+        return <Bicycle className="h-4 w-4" />;
       default:
-        return <Badge variant="outline">غير معروف</Badge>;
+        return <Package className="h-4 w-4" />;
     }
   };
-  
-  const getDriverStatusBadge = (status) => {
-    switch (status) {
-      case "available":
-        return <Badge variant="secondary" className="bg-green-500 text-white">متاح</Badge>;
-      case "busy":
-        return <Badge variant="secondary" className="bg-yellow-500">مشغول</Badge>;
-      case "offline":
-        return <Badge variant="outline">غير متصل</Badge>;
-      default:
-        return <Badge variant="outline">غير معروف</Badge>;
-    }
-  };
-  
-  const handleManualAssign = (orderId, driverId) => {
-    toast.success(`تم تعيين الطلب ${orderId} للسائق ${driverId}`, {
-      description: "يمكنك متابعة الطلب من خلال قسم التتبع المباشر"
+
+  // دالة لتوزيع الطلب على سائق
+  const assignOrder = (orderId, driverId) => {
+    toast.success(`تم توزيع الطلب ${orderId} إلى السائق ${driverId}`, {
+      description: "سيتم إشعار السائق بالطلب الجديد"
     });
   };
-  
-  const handleAutoAssign = () => {
-    toast.success("تم تعيين الطلبات تلقائياً للسائقين المتاحين", {
-      description: "تم تعيين 3 طلبات بنجاح"
-    });
-  };
-  
-  const pendingOrders = orders.filter(order => order.status === "pending");
-  const assignedOrders = orders.filter(order => order.status === "assigned");
-  const availableDrivers = drivers.filter(driver => driver.status === "available");
-  
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold">إدارة وتعيين الطلبات</h2>
-          <p className="text-muted-foreground">تعيين الطلبات للسائقين بناءً على الأولوية والموقع</p>
-        </div>
-        <div className="flex items-center mt-4 md:mt-0">
-          <Button 
-            className={`flex items-center ${isAutoAssignEnabled ? 'bg-green-600 hover:bg-green-700' : 'bg-muted'}`}
-            onClick={() => {
-              setIsAutoAssignEnabled(!isAutoAssignEnabled);
-              toast.info(
-                isAutoAssignEnabled 
-                  ? "تم إيقاف التعيين التلقائي" 
-                  : "تم تفعيل التعيين التلقائي"
-              );
-            }}
-          >
-            <RefreshCw className="mr-2 h-4 w-4" />
-            التعيين التلقائي {isAutoAssignEnabled ? 'مفعل' : 'معطل'}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+        <h2 className="text-2xl font-bold">إدارة توزيع الطلبات</h2>
+        
+        <div className="flex gap-2 mt-2 md:mt-0">
+          <Button variant="outline" size="sm">
+            <Filter className="h-4 w-4 mr-1" />
+            فلترة
           </Button>
-          <Button 
-            className="mr-2" 
-            variant="outline"
-            onClick={handleAutoAssign}
-          >
-            <TrendingUp className="mr-2 h-4 w-4" />
-            تعيين تلقائي الآن
+          <Button variant="outline" size="sm">
+            <Sliders className="h-4 w-4 mr-1" />
+            إعدادات التوزيع
+          </Button>
+          <Button size="sm">
+            <BarChart4 className="h-4 w-4 mr-1" />
+            تقارير
           </Button>
         </div>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Clock className="mr-2 h-5 w-5" />
-              الطلبات
-            </CardTitle>
-            <CardDescription>
-              إجمالي الطلبات: {orders.length} | بانتظار التعيين: {pendingOrders.length}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Tabs defaultValue="pending" value={activeTab} onValueChange={setActiveTab}>
-              <div className="border-b px-3">
-                <TabsList className="w-full justify-start">
-                  <TabsTrigger value="pending" className="relative">
-                    قيد الانتظار
-                    {pendingOrders.length > 0 && (
-                      <Badge className="mr-2 bg-blue-500">{pendingOrders.length}</Badge>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value="assigned">
-                    تم التعيين
-                    {assignedOrders.length > 0 && (
-                      <Badge className="mr-2 bg-green-500">{assignedOrders.length}</Badge>
-                    )}
-                  </TabsTrigger>
-                </TabsList>
+
+      {/* إحصائيات سريعة */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-muted-foreground">طلبات في الانتظار</p>
+                <p className="text-2xl font-bold">12</p>
               </div>
-              <TabsContent value="pending" className="m-0">
-                <ScrollArea className="h-[400px] w-full">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>رقم الطلب</TableHead>
-                        <TableHead>العميل</TableHead>
-                        <TableHead>الموقع</TableHead>
-                        <TableHead>المسافة</TableHead>
-                        <TableHead>الأولوية</TableHead>
-                        <TableHead>الوقت</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pendingOrders.map((order) => (
-                        <TableRow key={order.id} className="cursor-pointer hover:bg-muted/50">
-                          <TableCell className="font-medium">{order.id}</TableCell>
-                          <TableCell>{order.customer}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
-                              {order.location}
-                            </div>
-                          </TableCell>
-                          <TableCell>{order.distance}</TableCell>
-                          <TableCell>{getPriorityBadge(order.priority)}</TableCell>
-                          <TableCell>{order.timestamp}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-              </TabsContent>
-              <TabsContent value="assigned" className="m-0">
-                <ScrollArea className="h-[400px] w-full">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>رقم الطلب</TableHead>
-                        <TableHead>العميل</TableHead>
-                        <TableHead>الموقع</TableHead>
-                        <TableHead>الحالة</TableHead>
-                        <TableHead>الوقت</TableHead>
-                        <TableHead></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {assignedOrders.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell className="font-medium">{order.id}</TableCell>
-                          <TableCell>{order.customer}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
-                              {order.location}
-                            </div>
-                          </TableCell>
-                          <TableCell>{getStatusBadge(order.status)}</TableCell>
-                          <TableCell>{order.timestamp}</TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="sm" onClick={() => {
-                              toast.info(`عرض تفاصيل الطلب ${order.id}`);
-                            }}>
-                              عرض
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-              </TabsContent>
-            </Tabs>
+              <Package className="h-8 w-8 text-blue-500" />
+            </div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <PackagePlus className="mr-2 h-5 w-5" />
-              السائقين المتاحين
-            </CardTitle>
-            <CardDescription>
-              سائقين متاحين: {availableDrivers.length} | إجمالي السائقين: {drivers.length}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ScrollArea className="h-[456px] w-full">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>السائق</TableHead>
-                    <TableHead>الحالة</TableHead>
-                    <TableHead>الحمولة</TableHead>
-                    <TableHead>الموقع</TableHead>
-                    <TableHead>التقييم</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {drivers.map((driver) => (
-                    <TableRow key={driver.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-2">
-                            {driver.name.charAt(0)}
-                          </div>
-                          <div>
-                            <div>{driver.name}</div>
-                            <div className="text-xs text-muted-foreground">{driver.id}</div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getDriverStatusBadge(driver.status)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
-                            <div 
-                              className={`h-2.5 rounded-full ${
-                                driver.currentLoad / driver.maxCapacity > 0.8 ? 'bg-red-500' : 'bg-green-500'
-                              }`} 
-                              style={{ width: `${(driver.currentLoad / driver.maxCapacity) * 100}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-xs whitespace-nowrap">{driver.currentLoad}/{driver.maxCapacity}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
-                          {driver.location}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <span className="text-yellow-500">★</span>
-                          <span className="ml-1">{driver.rating}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {driver.status === "available" && activeTab === "pending" && pendingOrders.length > 0 && (
-                          <Button 
-                            size="sm" 
-                            onClick={() => handleManualAssign(pendingOrders[0].id, driver.id)}
-                          >
-                            تعيين
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </ScrollArea>
+        <Card className="bg-green-50">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-muted-foreground">قيد التوصيل</p>
+                <p className="text-2xl font-bold">8</p>
+              </div>
+              <Truck className="h-8 w-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-yellow-50">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-muted-foreground">متوسط وقت التوصيل</p>
+                <p className="text-2xl font-bold">28 د</p>
+              </div>
+              <Clock className="h-8 w-8 text-yellow-500" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-purple-50">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-muted-foreground">سائقين متاحين</p>
+                <p className="text-2xl font-bold">15</p>
+              </div>
+              <User className="h-8 w-8 text-purple-500" />
+            </div>
           </CardContent>
         </Card>
       </div>
-      
+
+      {/* نظام اختيار نوع التوصيل */}
+      <Card>
+        <CardHeader>
+          <CardTitle>اختيار نوع التوصيل</CardTitle>
+          <CardDescription>حدد نوع التوصيل المناسب لطلبك</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DeliveryTypeSelection />
+        </CardContent>
+      </Card>
+
+      {/* نظام التوزيع الذكي للطلبات */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <TrendingUp className="mr-2 h-5 w-5" />
-            توصيات التعيين الذكي
+            <FileCheck className="h-5 w-5 mr-2" />
+            نظام التوزيع الذكي للطلبات
           </CardTitle>
-          <CardDescription>
-            توصيات مبنية على بيانات الموقع والأولوية وقدرة السائقين
-          </CardDescription>
+          <CardDescription>توزيع الطلبات حسب الأولوية والموقع ونوع المركبة</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {pendingOrders.length > 0 && availableDrivers.length > 0 ? (
-              pendingOrders.slice(0, 3).map((order, index) => (
-                <div key={order.id} className="flex items-center justify-between border p-3 rounded-md">
-                  <div className="flex items-center">
-                    <div className="mr-4">
-                      <div className="font-medium">{order.id} - {order.customer}</div>
-                      <div className="text-sm text-muted-foreground">
-                        <MapPin className="h-3 w-3 inline mr-1" />
-                        {order.location} ({order.distance})
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="text-center px-4">
-                      <div className="font-medium text-lg">→</div>
-                    </div>
-                    <div className="mr-4">
-                      <div className="font-medium">{availableDrivers[index % availableDrivers.length].name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        حمولة: {availableDrivers[index % availableDrivers.length].currentLoad}/{availableDrivers[index % availableDrivers.length].maxCapacity}
-                      </div>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      onClick={() => handleManualAssign(
-                        order.id, 
-                        availableDrivers[index % availableDrivers.length].id
-                      )}
-                    >
-                      تعيين
-                    </Button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
-                <AlertTriangle className="h-10 w-10 mb-4" />
-                <h3 className="text-lg font-medium">لا توجد توصيات حالياً</h3>
-                <p className="max-w-md mt-2">
-                  {pendingOrders.length === 0 
-                    ? "لا توجد طلبات في قائمة الانتظار للتعيين." 
-                    : "لا يوجد سائقين متاحين حالياً لتعيين الطلبات."}
-                </p>
+          <Tabs defaultValue="pending" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="pending">طلبات في الانتظار</TabsTrigger>
+              <TabsTrigger value="assigned">طلبات موزعة</TabsTrigger>
+              <TabsTrigger value="company">توصيل الشركات</TabsTrigger>
+              <TabsTrigger value="freelance">توصيل فردي</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="pending">
+              <div className="border rounded-md overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="p-3 text-right">رقم الطلب</th>
+                      <th className="p-3 text-right">العميل</th>
+                      <th className="p-3 text-right">العنوان</th>
+                      <th className="p-3 text-right">العناصر</th>
+                      <th className="p-3 text-right">الأولوية</th>
+                      <th className="p-3 text-right">نوع المركبة</th>
+                      <th className="p-3 text-right">إجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.filter(order => !order.assignedTo).map((order) => (
+                      <tr key={order.id} className="border-t">
+                        <td className="p-3">{order.id}</td>
+                        <td className="p-3">{order.customer}</td>
+                        <td className="p-3">
+                          <div className="flex items-center">
+                            <MapPin className="h-3 w-3 ml-1 text-gray-500" />
+                            <span className="text-sm">{order.address}</span>
+                          </div>
+                        </td>
+                        <td className="p-3">{order.items}</td>
+                        <td className="p-3">{getPriorityBadge(order.priority)}</td>
+                        <td className="p-3">
+                          <div className="flex items-center">
+                            {getVehicleIcon(order.vehicle)}
+                            <span className="mr-1">
+                              {order.vehicle === "truck" ? "شاحنة" :
+                                order.vehicle === "car" ? "سيارة" :
+                                order.vehicle === "motorcycle" ? "دراجة نارية" : "دراجة هوائية"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <Button size="sm" onClick={() => {
+                            // هنا يمكن فتح نافذة منبثقة لاختيار سائق
+                            toast.success(`اختيار سائق للطلب ${order.id}`, {
+                              description: "يمكنك اختيار السائق المناسب من القائمة"
+                            });
+                          }}>
+                            توزيع
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            )}
+            </TabsContent>
+            
+            <TabsContent value="assigned">
+              <div className="border rounded-md overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="p-3 text-right">رقم الطلب</th>
+                      <th className="p-3 text-right">العميل</th>
+                      <th className="p-3 text-right">السائق</th>
+                      <th className="p-3 text-right">الوقت المتوقع</th>
+                      <th className="p-3 text-right">حالة التوصيل</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.filter(order => order.assignedTo).map((order) => (
+                      <tr key={order.id} className="border-t">
+                        <td className="p-3">{order.id}</td>
+                        <td className="p-3">{order.customer}</td>
+                        <td className="p-3">{order.assignedTo}</td>
+                        <td className="p-3">{order.eta}</td>
+                        <td className="p-3">
+                          <Badge className="bg-green-500">قيد التوصيل</Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="company">
+              <div className="p-4 text-center border rounded-lg bg-blue-50">
+                <Truck className="h-16 w-16 mx-auto text-blue-500 mb-2" />
+                <h3 className="text-lg font-medium mb-2">نظام توصيل الشركات</h3>
+                <p className="mb-4 text-sm text-gray-600">يتيح هذا النظام توزيع الطلبات على أسطول الشركة حسب نوع المركبة والسعة والموقع</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardContent className="p-3">
+                      <h4 className="font-medium mb-2">توزيع حسب نوع المركبة</h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>شاحنات</span>
+                          <span>7 طلبات</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>سيارات</span>
+                          <span>12 طلب</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>دراجات نارية</span>
+                          <span>5 طلبات</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardContent className="p-3">
+                      <h4 className="font-medium mb-2">حالة المركبات</h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>متاحة</span>
+                          <span>15 مركبة</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>مشغولة</span>
+                          <span>22 مركبة</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>في الصيانة</span>
+                          <span>3 مركبات</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="freelance">
+              <div className="p-4 text-center border rounded-lg bg-purple-50">
+                <User className="h-16 w-16 mx-auto text-purple-500 mb-2" />
+                <h3 className="text-lg font-medium mb-2">نظام التوصيل الفردي</h3>
+                <p className="mb-4 text-sm text-gray-600">يتيح هذا النظام للسائقين المستقلين قبول الطلبات القريبة من موقعهم</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <Card>
+                    <CardContent className="p-3">
+                      <h4 className="font-medium mb-2">حالة السائقين</h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>متاحون</span>
+                          <Badge className="bg-green-500">24 سائق</Badge>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>مشغولون</span>
+                          <Badge className="bg-yellow-500">18 سائق</Badge>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>متصلون الآن</span>
+                          <Badge className="bg-blue-500">42 سائق</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardContent className="p-3">
+                      <h4 className="font-medium mb-2">معدل القبول</h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>معدل قبول الطلبات</span>
+                          <span>78%</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>متوسط وقت القبول</span>
+                          <span>45 ثانية</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>معدل إكمال الطلبات</span>
+                          <span>96%</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* قائمة السائقين المتاحين */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <User className="h-5 w-5 mr-2" />
+            السائقون المتاحون
+          </CardTitle>
+          <CardDescription>قائمة بالسائقين المتاحين حاليًا ويمكن توزيع الطلبات إليهم</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-md overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-muted">
+                <tr>
+                  <th className="p-3 text-right">رقم السائق</th>
+                  <th className="p-3 text-right">الاسم</th>
+                  <th className="p-3 text-right">الحالة</th>
+                  <th className="p-3 text-right">المركبة</th>
+                  <th className="p-3 text-right">الموقع</th>
+                  <th className="p-3 text-right">السعة المتبقية</th>
+                  <th className="p-3 text-right">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {drivers.filter(driver => driver.status === "available").map((driver) => (
+                  <tr key={driver.id} className="border-t">
+                    <td className="p-3">{driver.id}</td>
+                    <td className="p-3">{driver.name}</td>
+                    <td className="p-3">
+                      <Badge className="bg-green-500">متاح</Badge>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex items-center">
+                        {getVehicleIcon(driver.vehicle)}
+                        <span className="mr-1">
+                          {driver.vehicle === "truck" ? "شاحنة" :
+                            driver.vehicle === "car" ? "سيارة" :
+                            driver.vehicle === "motorcycle" ? "دراجة نارية" : "دراجة هوائية"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex items-center">
+                        <MapPin className="h-3 w-3 ml-1 text-gray-500" />
+                        <span className="text-sm">{driver.location}</span>
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex items-center">
+                        <span>{driver.capacity - driver.orders}</span>
+                        <span className="mx-1">/</span>
+                        <span>{driver.capacity}</span>
+                      </div>
+                    </td>
+                    <td className="p-3">
+                      <Button size="sm" variant="outline" onClick={() => {
+                        // هنا يمكن فتح نافذة منبثقة لعرض الطلبات المتاحة
+                        toast.success(`عرض الطلبات المتاحة للسائق ${driver.name}`, {
+                          description: "يمكنك اختيار الطلب المناسب من القائمة"
+                        });
+                      }}>
+                        عرض الطلبات
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>
     </div>
   );
 };
+
+// إضافة الأيقونات المفقودة
+import { Car, Bike, Bicycle } from "lucide-react";
 
 export default OrderAssignment;
