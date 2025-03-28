@@ -1,54 +1,81 @@
+import React from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Index from "@/pages/Index";
+import Auth from "@/pages/Auth";
+import Register from "@/pages/Register";
+import Dashboard from "@/pages/Dashboard";
+import StoreOwnerDashboard from "@/pages/StoreOwnerDashboard";
+import Checkout from "@/pages/Checkout";
+import Cart from "@/pages/Cart";
+import ProductDetail from "@/pages/ProductDetail";
+import ControlPanels from "@/pages/ControlPanels";
+import OrderTracking from "@/pages/OrderTracking";
+import Stores from "@/pages/Stores";
+import StoresMap from "@/pages/StoresMap";
+import NotFound from "@/pages/NotFound";
+import DeliveryDashboard from "@/pages/DeliveryDashboard";
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Index />,
+  },
+  {
+    path: "/login",
+    element: <Auth />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
+  {
+    path: "/dashboard",
+    element: <Dashboard />,
+  },
+  {
+    path: "/store-owner",
+    element: <StoreOwnerDashboard />,
+  },
+  {
+    path: "/delivery-dashboard",
+    element: <DeliveryDashboard />,
+  },
+  {
+    path: "/checkout",
+    element: <Checkout />,
+  },
+  {
+    path: "/cart",
+    element: <Cart />,
+  },
+  {
+    path: "/product/:id",
+    element: <ProductDetail />,
+  },
+  {
+    path: "/control-panels",
+    element: <ControlPanels />,
+  },
+  {
+    path: "/order-tracking",
+    element: <OrderTracking />,
+  },
+  {
+    path: "/stores",
+    element: <Stores />,
+  },
+  {
+    path: "/stores/map",
+    element: <StoresMap />,
+  },
+  {
+    path: "/*",
+    element: <NotFound />,
+  },
+]);
 
-// Pages
-import Index from "./pages/Index";
-import ProductDetail from "./pages/ProductDetail";
-import Auth from "./pages/Auth";
-import Register from "./pages/Register";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import Dashboard from "./pages/Dashboard";
-import OrderTracking from "./pages/OrderTracking";
-import Stores from "./pages/Stores";
-import StoresMap from "./pages/StoresMap";
-import ControlPanels from "./pages/ControlPanels";
-import StoreOwnerDashboard from "./pages/StoreOwnerDashboard";
-import NotFound from "./pages/NotFound";
-
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AnimatePresence mode="wait">
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/order-tracking" element={<OrderTracking />} />
-            <Route path="/stores" element={<Stores />} />
-            <Route path="/stores-map" element={<StoresMap />} />
-            <Route path="/control-panels" element={<ControlPanels />} />
-            <Route path="/store-owner-dashboard" element={<StoreOwnerDashboard />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AnimatePresence>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return <RouterProvider router={router} />;
+}
 
 export default App;
