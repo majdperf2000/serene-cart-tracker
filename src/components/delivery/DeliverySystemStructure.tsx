@@ -1,10 +1,9 @@
-
 import React from "react";
 import { 
   Truck, 
   Car, 
   Bike, 
-  Bicycle,
+  Bike as BicycleAlternative,
   Building2,
   Users,
   ArrowDown,
@@ -53,7 +52,7 @@ const DeliverySystemStructure = () => {
                       <span className="text-sm">دراجات نارية</span>
                     </div>
                     <div className="flex flex-col items-center p-2 bg-gray-50 rounded-lg">
-                      <Bicycle className="h-8 w-8 text-gray-600 mb-1" />
+                      <BicycleAlternative className="h-8 w-8 text-gray-600 mb-1" />
                       <span className="text-sm">دراجات هوائية</span>
                     </div>
                   </div>
@@ -135,7 +134,6 @@ const DeliverySystemStructure = () => {
             </Card>
           </div>
 
-          {/* Database Schema */}
           <div className="mt-8">
             <h3 className="text-lg font-medium mb-4">هيكل البيانات المقترح:</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -191,7 +189,6 @@ const DeliverySystemStructure = () => {
             </div>
           </div>
 
-          {/* Implementation Steps */}
           <div className="mt-8">
             <h3 className="text-lg font-medium mb-4">خطوات التنفيذ المقترحة:</h3>
             <ol className="space-y-2 list-decimal pr-6">

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,7 +12,10 @@ import {
   MapPin,
   BarChart4,
   Sliders,
-  Filter
+  Filter,
+  Car,
+  Bike,
+  Bike as BicycleAlternative
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -35,7 +37,6 @@ const OrderAssignment = () => {
     { id: "DRV-504", name: "محمد علي", status: "available", vehicle: "bicycle", location: "الرياض، حي الروضة", capacity: 2, orders: 0 },
   ];
 
-  // دالة لعرض شارة الأولوية
   const getPriorityBadge = (priority) => {
     switch(priority) {
       case "high":
@@ -49,7 +50,6 @@ const OrderAssignment = () => {
     }
   };
 
-  // دالة لعرض أيقونة المركبة
   const getVehicleIcon = (vehicle) => {
     switch(vehicle) {
       case "truck":
@@ -59,13 +59,12 @@ const OrderAssignment = () => {
       case "motorcycle":
         return <Bike className="h-4 w-4" />;
       case "bicycle":
-        return <Bicycle className="h-4 w-4" />;
+        return <BicycleAlternative className="h-4 w-4" />;
       default:
         return <Package className="h-4 w-4" />;
     }
   };
 
-  // دالة لتوزيع الطلب على سائق
   const assignOrder = (orderId, driverId) => {
     toast.success(`تم توزيع الطلب ${orderId} إلى السائق ${driverId}`, {
       description: "سيتم إشعار السائق بالطلب الجديد"
@@ -93,7 +92,6 @@ const OrderAssignment = () => {
         </div>
       </div>
 
-      {/* إحصائيات سريعة */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-blue-50">
           <CardContent className="p-4">
@@ -144,7 +142,6 @@ const OrderAssignment = () => {
         </Card>
       </div>
 
-      {/* نظام اختيار نوع التوصيل */}
       <Card>
         <CardHeader>
           <CardTitle>اختيار نوع التوصيل</CardTitle>
@@ -155,14 +152,13 @@ const OrderAssignment = () => {
         </CardContent>
       </Card>
 
-      {/* نظام التوزيع الذكي للطلبات */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
             <FileCheck className="h-5 w-5 mr-2" />
             نظام التوزيع الذكي للطلبات
           </CardTitle>
-          <CardDescription>توزيع الطلبات حسب الأولوية والموقع ونوع المركبة</CardDescription>
+          <CardDescription>توزي�� الطلبات حسب الأولوية والموقع ونوع المركبة</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="pending" className="w-full">
@@ -212,7 +208,6 @@ const OrderAssignment = () => {
                         </td>
                         <td className="p-3">
                           <Button size="sm" onClick={() => {
-                            // هنا يمكن فتح نافذة منبثقة لاختيار سائق
                             toast.success(`اختيار سائق للطلب ${order.id}`, {
                               description: "يمكنك اختيار السائق المناسب من القائمة"
                             });
@@ -359,7 +354,6 @@ const OrderAssignment = () => {
         </CardContent>
       </Card>
 
-      {/* قائمة السائقين المتاحين */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -415,7 +409,6 @@ const OrderAssignment = () => {
                     </td>
                     <td className="p-3">
                       <Button size="sm" variant="outline" onClick={() => {
-                        // هنا يمكن فتح نافذة منبثقة لعرض الطلبات المتاحة
                         toast.success(`عرض الطلبات المتاحة للسائق ${driver.name}`, {
                           description: "يمكنك اختيار الطلب المناسب من القائمة"
                         });
@@ -433,8 +426,5 @@ const OrderAssignment = () => {
     </div>
   );
 };
-
-// إضافة الأيقونات المفقودة
-import { Car, Bike, Bicycle } from "lucide-react";
 
 export default OrderAssignment;
